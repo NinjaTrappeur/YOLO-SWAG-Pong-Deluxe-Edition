@@ -2,14 +2,15 @@
 //=============================
 
 var Position = function(x,y,z){
-  if(x ==null || y==null || z==null)
-    throw("You need to specify x,y and z coordinates\
-          to create a Position object.");
-  else{
+  if(typeof x == "number" && typeof y=="number" && typeof z == "number")
+  {
     this.x = x;
     this.y = y;
     this.z = z;
   }
+  else
+   throw("You need to specify x,y and z numbers\
+          to create a Position object.");
 }
 
 Position.prototype.getX = function(){
@@ -43,13 +44,13 @@ Position.prototype.setZ = function(z){
 //===================================
 
 var Size = function(width, length){
-  if(width ==null || length==null)
-    throw("You need to specify width and length values\
-          to create a Size object.");
-  else{
+  if(typeof width == "number" && typeof length == "number"){
     this.width = width;
     this.length = length;
   }
+  else
+    throw("You need to specify width and length values\
+    to create a Size object: width = " + width + " lenght = " + length);
 }
 
 Size.prototype.getWidth = function(){
@@ -77,3 +78,4 @@ var extendClass = function(child, parent) {
   Surrogate.prototype = parent.prototype;
   child.prototype = new Surrogate();
 };
+500 instanceof Number;

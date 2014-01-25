@@ -1,5 +1,7 @@
 /*
- * This composant handles the core of the game.
+ * This composant handles the content of the game.
+ * It needs to be computed by a game engine component and displayed
+ * by a game renderer component.
  * This composant provides
  */
 
@@ -7,15 +9,16 @@
 //=====================================
 
 var GameObject = function(position, size){
-  if(!(position instanceof Position) || !(size instanceof Size))
+  if(position instanceof Position && size instanceof Size)
+    {
+      this.position = position;
+      this.size = size;
+      this.name = "Object";
+      this.state = "None";
+    }
+  else
     throw("You need to specify position and size parameter to create\
            a GameObject element.");
-  else{
-    this.position = position;
-    this.size = size;
-    this.name = "Object";
-    this.state = "None";
-  }
 }
 
 GameObject.prototype.getPosition = function(){
@@ -58,12 +61,12 @@ Arena.prototype.getGoalSize = function(){
 //====================================
 
 var Bat = function(position, size, id){
-  if(id == null)
-    throw "You need to specify a bat id to create a Bat object";
-  else{
+  if(typeof id=="number"){
     GameObject.call(this,position , size);
     this.id = id;
   }
+  else
+    throw "You need to specify a bat id to create a Bat object";
 }
 
 extendClass(Bat, GameObject);
@@ -79,23 +82,18 @@ var Ball = function(position, size){
 extendClass(Ball, GameObject);
 
 
-//CollisionDetection function
-//========================================
-
-var CollisionDetection = function(object1, object2){
-
-}
-
 //Player class
 //=======================================
 
 var Player = function(id, name){
-  if(!(id instanceof number))
-    throw "You need to specify a ID number to create a Player.";
-  if(!(name instanceof string))
-    throw "You need to specify a name to create a Player.";
-  this.id = id;
-  this.name = name;
+  if(id instanceof number && name instanceof string)
+    {
+      this.id = id;
+      this.name = name;
+    }
+  else
+    throw "You need to specify an ID number and a name\
+          to create a Player.";
 }
 
 Player.prototype.getName = function(){return this.name;};
@@ -105,29 +103,38 @@ Player.prototype.getId = function(){return this.id;};
 //Game: main class of this component.
 //========================================
 
-var Game = function(){
+var GameState = function(){
   this.bats = new Array();
   this.balls = new Array();
-  this.arena = new Arena(500,500);
-  this.playerLife = 3;
-  this.otherPlayersLife = new Array();
+  this.arena = new Arena(new Size(500,500));
+  this.localPlayerId=0;
+  this.players = new Array();
   this.gameState = "Init";
 }
 
-Game.prototype.addBall = function(ball){
+GameState.prototype.addBall = function(ball){
   if(ball instanceof Ball)
     this.balls.push(ball);
   else
     throw "Wrong paramater type, parameter needs to be a Ball.";
 }
 
-Game.prototype.addBat = function(bat){
+GameState.prototype.addBat = function(bat){
   if(bat instanceof Bat)
     this.bats.push(bat);
   else
     throw "Wrong paramater type, parameter needs to be a Bat.";
 }
 
-Game.prototype.getBats = function(){return this.bats;}
+GameState.prototype.addPlayer = function(player){
+  if(player instanceof Player)
+    this.players.push(player);
+  else
+    throw("Parameter needs to be a Player.");
+}
 
-Game.prototype.getBalls = function(){return this.balls;}
+GameState.prototype.getBats = function(){return this.bats;}
+
+GameState.prototype.getBalls = function(){return this.balls;}
+
+GameState.prototype.getPlayers = function(){return this.players;}

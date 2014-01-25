@@ -21,6 +21,10 @@ function init(){
 	THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) })
 
 	scene.fog = new THREE.FogExp2(0x000000,0.08);
+
+  var gameState = new GameState();
+  gameState.addBall(new Ball(new Position(250,250,0), new Size(10,10)));
+  gameState.addBat(new Bat(new Position(50,10,0), new Size(50,10), 0));
 	animate();
   }
 
