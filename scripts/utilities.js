@@ -2,9 +2,14 @@
 //=============================
 
 var Position = function(x,y,z){
-  this.x = x;
-  this.y = y;
-  this.z = z;
+  if(x ==null || y==null || z==null)
+    throw("You need to specify x,y and z coordinates\
+          to create a Position object.");
+  else{
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
 }
 
 Position.prototype.getX = function(){
@@ -38,8 +43,13 @@ Position.prototype.setZ = function(z){
 //===================================
 
 var Size = function(width, length){
-  this.width = width;
-  this.length = length;
+  if(width ==null || length==null)
+    throw("You need to specify width and length values\
+          to create a Size object.");
+  else{
+    this.width = width;
+    this.length = length;
+  }
 }
 
 Size.prototype.getWidth = function(){
