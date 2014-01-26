@@ -1,36 +1,20 @@
-var camera, scene, renderer;
+var renderer;
 
 function init(){
-	//Creating renderer
-	if ( Detector.webgl )
-	       renderer = new THREE.WebGLRenderer( );
-	else
-	       document.getElementById('scene').textContent="Cette application necessite un terminal supportant webgl";
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	//adding extern lirairies
+  	THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
 
-	//creating camera
-  camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 1000 );
-	camera.position.y = 0;
-	camera.position.z = 0;
-
-	scene = new THREE.Scene();
-	scene.camera = camera;
-
-	THREEx.WindowResize(renderer, camera);
-	THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) })
-
-	scene.fog = new THREE.FogExp2(0x000000,0.08);
-
-  var gameState = new GameState();
-  gameState.addBall(new Ball(new Position(250,250,0), new Size(10,10)));
-  gameState.addBat(new Bat(new Position(50,10,0), new Size(50,10), 0));
+  //Creation gamestate
+  gameState = new GameState();
+  //Filling gamestate
+  gameState.addBall(new Ball(new Position(50,50,50), new Size(30,30)));
+  //Creating renderer
+  renderer = new SimpleRenderer(gameState);
+  renderer.init();
 	animate();
   }
 
-
 function animate(){
-	renderer.render(scene,camera);
+	renderer.render();
 	requestAnimationFrame(animate);
 }
 

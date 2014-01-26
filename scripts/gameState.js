@@ -48,6 +48,7 @@ GameObject.prototype.setState = function(state){
 var Arena = function(size){
   GameObject.call(this,new Position(0,0,0), size);
   this.goalSize = size.getWidth()/3;
+  this.name = "Arena";
 }
 
 extendClass(Arena, GameObject);
@@ -64,6 +65,7 @@ var Bat = function(position, size, id){
   if(typeof id=="number"){
     GameObject.call(this,position , size);
     this.id = id;
+    this.name = "Bat";
   }
   else
     throw "You need to specify a bat id to create a Bat object";
@@ -77,6 +79,7 @@ extendClass(Bat, GameObject);
 
 var Ball = function(position, size){
   GameObject.call(this, position, size);
+  this.name = "Ball";
 }
 
 extendClass(Ball, GameObject);
