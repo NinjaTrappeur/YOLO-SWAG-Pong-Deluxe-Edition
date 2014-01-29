@@ -16,8 +16,6 @@ function init(){
 	animate();
 }
 
-
-
 function animate(){
   renderer.render();
     requestAnimationFrame( animate );

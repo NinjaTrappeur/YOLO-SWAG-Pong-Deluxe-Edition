@@ -76,32 +76,13 @@ SimpleRenderer.prototype.init = function(){
 
 
   //Creating arena
-  var border = 0.05;
-  geometry = new THREE.PlaneGeometry(this.gameState.arena.size.width,this.gameState.arena.size.length);
+  geometry = new THREE.PlaneGeometry(this.gameState.arena.size.width,
+                                     this.gameState.arena.size.length);
   material = new THREE.MeshNormalMaterial();
   mesh = new THREE.Mesh(geometry, material);
-  this.arena = mesh;
   this.scene.add(mesh);
-
-  geometry = new THREE.CubeGeometry(this.gameState.arena.size.width+border,border,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(0,-this.gameState.arena.size.length/2,0);
-  this.scene.add(mesh);
-
-  geometry = new THREE.CubeGeometry(this.gameState.arena.size.width+border,border,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(0,this.gameState.arena.size.length/2,0);
-  this.scene.add(mesh);
-
-  geometry = new THREE.CubeGeometry(border,this.gameState.arena.size.length,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(this.gameState.arena.size.width/2,0,0);
-  this.scene.add(mesh);
-
-  geometry = new THREE.CubeGeometry(border,this.gameState.arena.size.length,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(-this.gameState.arena.size.width/2,0,0);
-  this.scene.add(mesh);
+  for(var i=0; i < this.gameState.arena.walls.length;++i)
+    this.scene.add(this.gameState.arena.walls[i]);
 
   var bat;
 
@@ -123,12 +104,14 @@ SimpleRenderer.prototype.init = function(){
   for(var i=0;i<this.gameState.balls.length;i++)
     {
       ball = this.gameState.balls[i];
-      geometry = new THREE.CubeGeometry(ball.size.width, ball.size.length, ball.size.width);
+      geometry = new THREE.CubeGeometry(ball.size.width,
+                                        ball.size.length, ball.size.width);
       material = new THREE.MeshBasicMaterial({color : 0xffffff});
       mesh = new THREE.Mesh(geometry, material);
       mesh.position.x = ball.position.x;
       mesh.position.y = ball.position.y;
       mesh.position.z = ball.position.z;
+      this.gameState.balls[i].mesh = mesh;
       this.balls.push(mesh);
       this.scene.add(mesh);
     }

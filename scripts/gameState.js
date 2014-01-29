@@ -31,6 +31,31 @@ var Arena = function(size){
   "use strict";
   GameObject.call(this,new Position(0,0,0), size);
   this.name = "Arena";
+  this.walls = new Array();
+  var border = 0.05;
+
+  var geometry,material,mesh;
+  material = new THREE.MeshNormalMaterial();
+  geometry = new THREE.CubeGeometry(size.width+border,border,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(0,-size.length/2,0);
+  this.walls.push(mesh);
+
+  geometry = new THREE.CubeGeometry(size.width+border,border,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(0,size.length/2,0);
+  this.walls.push(mesh);
+
+  geometry = new THREE.CubeGeometry(border,size.length,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(size.width/2,0,0);
+  this.walls.push(mesh);
+
+  geometry = new THREE.CubeGeometry(border,size.length,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(-size.width/2,0,0);
+  this.walls.push(mesh);
+
 }
 
 extendClass(Arena, GameObject);
@@ -51,7 +76,6 @@ var Bat = function(position, size, id){
 }
 
 extendClass(Bat, GameObject);
-
 
 //Ball class: extends GameObject
 //====================================
@@ -80,8 +104,6 @@ var Player = function(id, name){
           to create a Player.";
 }
 
-Player.prototype.getName = function(){return this.name;};
-Player.prototype.getId = function(){return this.id;};
 
 
 //Game: main class of this component.
