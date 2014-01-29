@@ -8,19 +8,22 @@
 
 var AbstractRenderer = function(gameState){
   if ( Detector.webgl )
-    this.renderer = new THREE.WebGLRenderer( );
+    this.renderer = new THREE.WebGLRenderer({antialias:true} );
 	else{
 	  document.getElementById('scene').textContent="Cette \
     application necessite un navigateur supportant webgl";
     throw("WebGL not supported.");
   }
 
+  container = document.getElementById("scene");
+  container.appendChild(this.renderer.domElement);
+
   if(gameState instanceof GameState)
     this.gameState = gameState;
   else
     throw("Parameter needs to be a GameState object.");
 
-  this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000 );
+  this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000 );
 
   this.scene = new THREE.Scene();
   this.scene.add(this.camera);
@@ -53,9 +56,10 @@ SimpleRenderer.prototype.init = function(){
   var material;
   var mesh;
 
-  geometry = new THREE.PlaneGeometry(6,10,10,10);
-  material = new THREE.MeshBasicMaterial({color : 0xffffff});
+  geometry = new THREE.PlaneGeometry(500,500);
+  material = new THREE.MeshBasicMaterial({color : 0xff0000});
   mesh = new THREE.Mesh(geometry, material);
+  mesh.doubleSided = true;
   this.arena = mesh;
   this.scene.add(mesh);
   var bat;
@@ -84,9 +88,7 @@ SimpleRenderer.prototype.init = function(){
       mesh.position.z = ball.position.z;
       this.balls.push(mesh);
       this.scene.add(mesh);
+      this.camera.position.set(75,250,3);
+      this.camera.lookAt(this.arena.position);
     }
-
-this.camera.position.z = 10;
-this.camera.position.y = -10;
-this.camera.rotation.x = 1;
 }

@@ -1,5 +1,6 @@
 var renderer;
 
+
 function init(){
   	THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
 
@@ -10,18 +11,14 @@ function init(){
   //Creating renderer
   renderer = new SimpleRenderer(gameState);
   renderer.init();
-  var cube = new THREE.CubeGeometry(2,0.5,0.5);
-  var mat = new THREE.MeshBasicMaterial();
-  renderer.scene.add(new THREE.Mesh(cube,mat));
 	animate();
 }
 
 
-renderer;
 
 function animate(){
-	renderer.render();
-  requestAnimationFrame(animate);
+  renderer.renderer.render(renderer.scene, renderer.camera);
+    requestAnimationFrame( animate );
 
 }
 
