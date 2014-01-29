@@ -2,12 +2,14 @@ var renderer;
 
 
 function init(){
-  	THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
+  "use strict";
+  THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
 
+  var gameState;
   //Creation gamestate
   gameState = new GameState();
   //Filling gamestate
-  gameState.addBall(new Ball(new Position(50,50,50), new Size(30,30)));
+  gameState.addBall(new Ball(new Position(0,0,0.1), new Size(0.08,0.08)));
   //Creating renderer
   renderer = new SimpleRenderer(gameState);
   renderer.init();
@@ -17,7 +19,7 @@ function init(){
 
 
 function animate(){
-  renderer.renderer.render(renderer.scene, renderer.camera);
+  renderer.render();
     requestAnimationFrame( animate );
 
 }
@@ -25,6 +27,7 @@ function animate(){
 
 //Main loop
 function mainLoop(){
+  "use strict";
   init();
   animate();
 }

@@ -9,6 +9,7 @@
 //=====================================
 
 var GameObject = function(position, size){
+  "use strict";
   if(position instanceof Position && size instanceof Size)
     {
       this.position = position;
@@ -27,22 +28,19 @@ var GameObject = function(position, size){
 //======================================
 
 var Arena = function(size){
+  "use strict";
   GameObject.call(this,new Position(0,0,0), size);
-  this.goalSize = size.getWidth()/3;
   this.name = "Arena";
 }
 
 extendClass(Arena, GameObject);
-
-Arena.prototype.getGoalSize = function(){
-  return this.goalSize;
-}
 
 
 //Bat class: extends GameObject
 //====================================
 
 var Bat = function(position, size, id){
+  "use strict";
   if(typeof id=="number"){
     GameObject.call(this,position , size);
     this.id = id;
@@ -59,6 +57,7 @@ extendClass(Bat, GameObject);
 //====================================
 
 var Ball = function(position, size){
+  "use strict";
   GameObject.call(this, position, size);
   this.name = "Ball";
 }
@@ -70,6 +69,7 @@ extendClass(Ball, GameObject);
 //=======================================
 
 var Player = function(id, name){
+  "use strict";
   if(id instanceof number && name instanceof string)
     {
       this.id = id;
@@ -88,15 +88,17 @@ Player.prototype.getId = function(){return this.id;};
 //========================================
 
 var GameState = function(){
+  "use strict";
   this.bats = new Array();
   this.balls = new Array();
-  this.arena = new Arena(new Size(500,500));
+  this.arena = new Arena(new Size(1,2));
   this.localPlayerId=0;
   this.players = new Array();
   this.gameState = "Init";
 }
 
 GameState.prototype.addBall = function(ball){
+  "use strict";
   if(ball instanceof Ball)
     this.balls.push(ball);
   else
@@ -104,6 +106,7 @@ GameState.prototype.addBall = function(ball){
 }
 
 GameState.prototype.addBat = function(bat){
+  "use strict";
   if(bat instanceof Bat)
     this.bats.push(bat);
   else
@@ -111,6 +114,7 @@ GameState.prototype.addBat = function(bat){
 }
 
 GameState.prototype.addPlayer = function(player){
+  "use strict";
   if(player instanceof Player)
     this.players.push(player);
   else

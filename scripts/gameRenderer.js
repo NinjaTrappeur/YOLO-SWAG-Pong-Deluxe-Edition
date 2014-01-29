@@ -7,6 +7,7 @@
  */
 
 var AbstractRenderer = function(gameState){
+  "use strict";
   if ( Detector.webgl )
     this.renderer = new THREE.WebGLRenderer({antialias:true} );
 	else{
@@ -16,7 +17,7 @@ var AbstractRenderer = function(gameState){
   }
   this.renderer.setSize( window.innerWidth, window.innerHeight );
 
-  container = document.getElementById("scene");
+  var container = document.getElementById("scene");
   container.appendChild(this.renderer.domElement);
 
   if(gameState instanceof GameState)
@@ -24,10 +25,8 @@ var AbstractRenderer = function(gameState){
   else
     throw("Parameter needs to be a GameState object.");
 
-  this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000 );
-  this.camera.lookAt(new THREE.Vector3(0,0,1));
-  this.camera.position.set(0,0,10);
-  this.camera.rotation.set(0,0,0);
+  this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10 );
+
 
   this.scene = new THREE.Scene();
   this.scene.add(this.camera);
@@ -66,23 +65,53 @@ var SimpleRenderer = function(gameState){
 extendClass(SimpleRenderer, AbstractRenderer);
 
 SimpleRenderer.prototype.init = function(){
+  "use strict";
   var geometry;
   var material;
   var mesh;
 
-  geometry = new THREE.PlaneGeometry(10,6);
-  material = new THREE.MeshBasicMaterial({color : 0xff0000});
+  this.camera.lookAt(new THREE.Vector3(0,0,1));
+  this.camera.position.set(0,-1.7,0.8);
+  this.camera.rotation.set(Math.PI/3,0,0);
+
+
+  //Creating arena
+  var border = 0.05;
+  geometry = new THREE.PlaneGeometry(this.gameState.arena.size.width,this.gameState.arena.size.length);
+  material = new THREE.MeshNormalMaterial();
   mesh = new THREE.Mesh(geometry, material);
-  mesh.doubleSided = true;
   this.arena = mesh;
   this.scene.add(mesh);
+
+  geometry = new THREE.CubeGeometry(this.gameState.arena.size.width+border,border,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(0,-this.gameState.arena.size.length/2,0);
+  this.scene.add(mesh);
+
+  geometry = new THREE.CubeGeometry(this.gameState.arena.size.width+border,border,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(0,this.gameState.arena.size.length/2,0);
+  this.scene.add(mesh);
+
+  geometry = new THREE.CubeGeometry(border,this.gameState.arena.size.length,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(this.gameState.arena.size.width/2,0,0);
+  this.scene.add(mesh);
+
+  geometry = new THREE.CubeGeometry(border,this.gameState.arena.size.length,border);
+  mesh = new THREE.Mesh(geometry,material);
+  mesh.position.set(-this.gameState.arena.size.width/2,0,0);
+  this.scene.add(mesh);
+
   var bat;
+
+  //Creating graphics objects.
   for(var i=0; i<this.gameState.bats.length;i++)
     {
       bat = this.gameState.bats[i];
       geometry = new THREE.PlaneGeometry(bat.size.width, bat.size.length);
       material = new THREE.MeshBasicMaterial({color : 0x00ff00});
-      mesh = new THREE.Mesh(geometry, material);
+      mesh = new THREE.Mesh(geometry,  material);
       mesh.position.x = bat.position.x;
       mesh.position.y = bat.position.y;
       mesh.position.z = bat.position.z;
@@ -94,7 +123,7 @@ SimpleRenderer.prototype.init = function(){
   for(var i=0;i<this.gameState.balls.length;i++)
     {
       ball = this.gameState.balls[i];
-      geometry = new THREE.PlaneGeometry(ball.size.width, ball.size.width);
+      geometry = new THREE.CubeGeometry(ball.size.width, ball.size.length, ball.size.width);
       material = new THREE.MeshBasicMaterial({color : 0xffffff});
       mesh = new THREE.Mesh(geometry, material);
       mesh.position.x = ball.position.x;
