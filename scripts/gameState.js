@@ -21,25 +21,6 @@ var GameObject = function(position, size){
            a GameObject element.");
 }
 
-GameObject.prototype.getPosition = function(){
-  return this.position;
-}
-
-GameObject.prototype.getSize = function(){
-  return this.size;
-}
-
-GameObject.prototype.getName = function(){
-  return this.name;
-}
-
-GameObject.prototype.getState = function(){
-  return this.state;
-}
-
-GameObject.prototype.setState = function(state){
-  this.state = state;
-}
 
 
 //Arena class: extends GameObject
@@ -135,9 +116,3 @@ GameState.prototype.addPlayer = function(player){
   else
     throw("Parameter needs to be a Player.");
 }
-
-GameState.prototype.getBats = function(){return this.bats;}
-
-GameState.prototype.getBalls = function(){return this.balls;}
-
-GameState.prototype.getPlayers = function(){return this.players;}
