@@ -78,8 +78,8 @@ SimpleRenderer.prototype.init = function(){
   var mesh;
 
   this.camera.lookAt(new THREE.Vector3(0,0,1));
-  this.camera.position.set(0,-1.7,0.8);
-  this.camera.rotation.set(Math.PI/3,0,0);
+  this.camera.position.set(0,-1.7,0.2);
+  this.camera.rotation.set(Math.PI/2.5,0,0);
 
 
   //Creating arena
@@ -112,4 +112,10 @@ SimpleRenderer.prototype.init = function(){
       this.scene.add(obstacle.mesh);
     }
 
+}
+
+SimpleRenderer.prototype.render = function(){
+    this.renderer.render(this.scene, this.camera);
+    this.camera.position.y = this.gameState.bats[0].position.y-0.3;
+    this.camera.position.x = this.gameState.bats[0].position.x+0.2;
 }

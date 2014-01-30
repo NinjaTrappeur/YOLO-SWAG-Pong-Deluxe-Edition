@@ -7,11 +7,19 @@ var GameEngine= function(gameState){
   if(gameState instanceof GameState){
     this.gameState = gameState;
 
-    gameState.addBall(new Ball(new Position(0,0,0.08), new Size(0.08,0.08)));
+    gameState.addBall(new Ball(new Position(0,0,0.04), new Size(0.08,0.08)));
     gameState.balls[0].velocity.set(-0.001,-0.001,0);
-    gameState.addBat(new Bat(new Position(-0.2,-0.8,0.08), new Size(0.4,0.08),
+    gameState.addBat(new Bat(new Position(-0.2,-0.8,0.04), new Size(0.4,0.08),
                              0, gameState.arena.size.width/2));
-    gameState.addObstacle(new Obstacle(new Position(-0.2,0.2,0.08), new Size(0.08,0.08)));
+    gameState.bats[0].velocity.set(0,0.001,0);
+    gameState.addObstacle(new Obstacle(new Position(-0.2,0.2,0.04), new Size(0.08,0.08)));
+    gameState.addObstacle(new Obstacle(new Position(0.3,0.4,0.04), new Size(0.08,0.08)));
+    gameState.addObstacle(new Obstacle(new Position(0.5,-0.6,0.04), new Size(0.1,0.08)));
+    gameState.addObstacle(new Obstacle(new Position(-0.3,-0.9,0.04), new Size(0.25,0.08)));
+    gameState.addObstacle(new Obstacle(new Position(0,-0.2,0.04), new Size(0.25,0.08)));
+
+
+
     this.step = 0.01;
     this.keyboard = new THREEx.KeyboardState();
   }
@@ -48,7 +56,16 @@ GameEngine.prototype.computeBalls = function(){
     }
 }
 
+GameEngine.prototype.computeBat = function(){
+  var bat = this.gameState.bats[0];
+  if(bat.position.y+ bat.velocity.y>this.gameState.arena.size.length/2)
+    bat.position.y-=this.gameState.arena.size.length;
+  bat.position.y+=bat.velocity.y;
+  bat.updateMeshPosition();
+}
+
 GameEngine.prototype.compute = function(){
   this.computeKeyboard();
   this.computeBalls();
+  this.computeBat();
 }

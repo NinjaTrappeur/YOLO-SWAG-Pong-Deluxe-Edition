@@ -56,7 +56,7 @@ var Obstacle = function(pos,size){
   this.name = "Obstacle";
   var geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
                                           this.size.length);
-  var material = new THREE.MeshBasicMaterial({color: 0x000000});
+  var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
   var mesh = new THREE.Mesh(geometry,  material);
   mesh.position.x = this.position.x;
   mesh.position.y = this.position.y;
@@ -100,26 +100,23 @@ var Bat = function(position, size, id, clearance){
 extendClass(Bat, MovingGameObject);
 
 Bat.prototype.moveLeft = function(step){
-  if(this.position.x + this.size.width - step < this.clearance)
+  if(this.position.x + this.size.width - step < -this.clearance)
     this.position.x += 2*this.clearance;
   this.position.x -= step;
-  this.updateMeshPosition();
 }
 
 Bat.prototype.moveRight = function(step){
   if(this.position.x + step > this.clearance)
     this.position.x -=2*this.clearance;
   this.position.x += step;
-  this.updateMeshPosition();
 }
 
 Bat.prototype.updateMeshPosition = function(){
-  for(var i=0; i<this.mesh.length;i++)
-  {
-    this.mesh[0].position.x = this.position.x+this.size.width/2;
-    this.mesh[1].position.x = this.position.x+this.size.width/2 - 2*this.clearance;
-    this.mesh[2].position.x = this.position.x+this.size.width/2 + 2*this.clearance;
-  }
+  this.mesh[0].position.x = this.position.x+this.size.width/2;
+  this.mesh[1].position.x = this.position.x+this.size.width/2 - 2*this.clearance;
+  this.mesh[2].position.x = this.position.x+this.size.width/2 + 2*this.clearance;
+  for(var i=0;i<this.mesh.length;i++)
+    this.mesh[i].position.y = this.position.y;
 }
 
 
