@@ -90,29 +90,20 @@ SimpleRenderer.prototype.init = function(){
   for(var i=0; i<this.gameState.bats.length;i++)
     {
       bat = this.gameState.bats[i];
-      geometry = new THREE.PlaneGeometry(bat.size.width, bat.size.length);
-      material = new THREE.MeshBasicMaterial({color : 0x00ff00});
-      mesh = new THREE.Mesh(geometry,  material);
-      mesh.position.x = bat.position.x;
-      mesh.position.y = bat.position.y;
-      mesh.position.z = bat.position.z;
-      this.scene.add(mesh);
-      this.bats.push(mesh);
+      this.scene.add(bat.mesh);
     }
 
   var ball;
   for(var i=0;i<this.gameState.balls.length;i++)
     {
       ball = this.gameState.balls[i];
-      geometry = new THREE.CubeGeometry(ball.size.width,
-                                        ball.size.length, ball.size.width);
-      material = new THREE.MeshBasicMaterial({color : 0xffffff});
-      mesh = new THREE.Mesh(geometry, material);
-      mesh.position.x = ball.position.x;
-      mesh.position.y = ball.position.y;
-      mesh.position.z = ball.position.z;
-      this.gameState.balls[i].mesh = mesh;
-      this.balls.push(mesh);
-      this.scene.add(mesh);
+      this.scene.add(ball.mesh);
     }
+  var obstacle;
+    for(var i=0;i<this.gameState.obstacles.length;i++)
+    {
+      obstacle = this.gameState.obstacles[i];
+      this.scene.add(obstacle.mesh);
+    }
+
 }
