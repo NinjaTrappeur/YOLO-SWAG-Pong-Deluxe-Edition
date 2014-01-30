@@ -1,3 +1,11 @@
+/*
+ * This composant handles the display of the game.
+ * It needs a GameState computed by a GameEngine
+ * The rendering is pretty basic and will be used
+ * mainly for testing.
+ */
+
+
 //class AbstractRenderer
 //===================================
 
@@ -16,9 +24,7 @@ var AbstractRenderer = function(gameState){
     throw("WebGL not supported.");
   }
   this.renderer.setSize( window.innerWidth, window.innerHeight );
-
-  var container = document.getElementById("scene");
-  container.appendChild(this.renderer.domElement);
+  document.body.appendChild( this.renderer.domElement );
 
   if(gameState instanceof GameState)
     this.gameState = gameState;
@@ -26,6 +32,7 @@ var AbstractRenderer = function(gameState){
     throw("Parameter needs to be a GameState object.");
 
   this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10 );
+  this.winResize   = new THREEx.WindowResize(this.renderer, this.camera)
 
 
   this.scene = new THREE.Scene();
@@ -81,8 +88,6 @@ SimpleRenderer.prototype.init = function(){
   material = new THREE.MeshNormalMaterial();
   mesh = new THREE.Mesh(geometry, material);
   this.scene.add(mesh);
-  for(var i=0; i < this.gameState.arena.walls.length;++i)
-    this.scene.add(this.gameState.arena.walls[i]);
 
   var bat;
 
@@ -90,7 +95,8 @@ SimpleRenderer.prototype.init = function(){
   for(var i=0; i<this.gameState.bats.length;i++)
     {
       bat = this.gameState.bats[i];
-      this.scene.add(bat.mesh);
+      for(var j=0;j<bat.mesh.length;++j)
+        this.scene.add(bat.mesh[j]);
     }
 
   var ball;

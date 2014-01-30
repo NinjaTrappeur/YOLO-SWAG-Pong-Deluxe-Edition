@@ -43,31 +43,6 @@ var Arena = function(size){
   var pos = new Position(0,0,0);
   GameObject.call(this,pos, size);
   this.name = "Arena";
-  this.walls = new Array();
-  var border = 0.05;
-
-  var geometry,material,mesh;
-  material = new THREE.MeshNormalMaterial();
-  geometry = new THREE.CubeGeometry(size.width+border,border,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(0,-size.length/2,0);
-  this.walls.push(mesh);
-
-  geometry = new THREE.CubeGeometry(size.width+border,border,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(0,size.length/2,0);
-  this.walls.push(mesh);
-
-  geometry = new THREE.CubeGeometry(border,size.length,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(size.width/2,0,0);
-  this.walls.push(mesh);
-
-  geometry = new THREE.CubeGeometry(border,size.length,border);
-  mesh = new THREE.Mesh(geometry,material);
-  mesh.position.set(-size.width/2,0,0);
-  this.walls.push(mesh);
-
 }
 
 extendClass(Arena, GameObject);
@@ -78,6 +53,7 @@ extendClass(Arena, GameObject);
 var Obstacle = function(pos,size){
   "use strict";
   GameObject.call(this,pos,size);
+  this.name = "Obstacle";
   var geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
                                           this.size.length);
   var material = new THREE.MeshBasicMaterial({color: 0x000000});
@@ -91,29 +67,61 @@ var Obstacle = function(pos,size){
 
 extendClass(Obstacle, GameObject);
 
+
+
 //Bat class: extends MovingGameObject
 //====================================
 
-var Bat = function(position, size, id){
+var Bat = function(position, size, id, clearance){
   "use strict";
-  if(typeof id=="number"){
+  if(typeof id=="number" && typeof clearance == "number"){
     MovingGameObject.call(this,position , size);
+
     this.id = id;
     this.name = "Bat";
+    this.mesh = new Array();
+    this.clearance = clearance;
     var geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
                                           this.size.length);
     var material = new THREE.MeshBasicMaterial({color: 0xff0000});
-    var mesh = new THREE.Mesh(geometry,  material);
-    mesh.position.x = this.position.x;
-    mesh.position.y = this.position.y;
-    mesh.position.z = this.position.z;
-    this.mesh = mesh;
+
+    for(var i=0;i<3;i++)
+      {
+        var mesh = new THREE.Mesh(geometry,  material);
+        mesh.position.y = this.position.y;
+        mesh.position.z = this.position.z;
+        this.mesh.push(mesh);
+      }
   }
   else
-    throw "You need to specify a bat id to create a Bat object";
+    throw "You need to specify a bat id and a clearance to create a Bat object";
 }
 
 extendClass(Bat, MovingGameObject);
+
+Bat.prototype.moveLeft = function(step){
+  if(this.position.x + this.size.width - step < this.clearance)
+    this.position.x += 2*this.clearance;
+  this.position.x -= step;
+  this.updateMeshPosition();
+}
+
+Bat.prototype.moveRight = function(step){
+  if(this.position.x + step > this.clearance)
+    this.position.x -=2*this.clearance;
+  this.position.x += step;
+  this.updateMeshPosition();
+}
+
+Bat.prototype.updateMeshPosition = function(){
+  for(var i=0; i<this.mesh.length;i++)
+  {
+    this.mesh[0].position.x = this.position.x+this.size.width/2;
+    this.mesh[1].position.x = this.position.x+this.size.width/2 - 2*this.clearance;
+    this.mesh[2].position.x = this.position.x+this.size.width/2 + 2*this.clearance;
+  }
+}
+
 
 //Ball class: extends MovingGameObject
 //====================================
@@ -131,8 +139,14 @@ var Ball = function(position, size){
   mesh.position.z = this.position.z;
   this.mesh = mesh;
 }
-
 extendClass(Ball, MovingGameObject);
+
+Ball.prototype.updateMesh = function(){
+  this.mesh.position.x = this.position.x;
+  this.mesh.position.y = this.position.y;
+}
+
+
 
 
 //Player class
