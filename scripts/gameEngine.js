@@ -9,10 +9,10 @@ var GameEngine = function (gameState) {
         this.gameState = gameState;
         
         gameState.addBall(new Ball(new Position(0, 0, 0.04), new Size(0.08, 0.08)));
-        gameState.balls[0].velocity.set(-0.000, -0.001, 0);
+        gameState.balls[0].velocity.set(-0.002, -0.001, 0);
         gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.4, 0.08),
                                  0, gameState.arena.size.width / 2));
-        gameState.bats[0].velocity.set(0, 0.001, 0);
+        gameState.bats[0].velocity.set(0.001, 0.001, 0);
         gameState.addObstacle(new Obstacle(new Position(-0.2, 0.2, 0.04), new Size(0.08, 0.08)));
         gameState.addObstacle(new Obstacle(new Position(0.3, 0.4, 0.04), new Size(0.08, 0.08)));
         gameState.addObstacle(new Obstacle(new Position(0.5, -0.6, 0.04), new Size(0.1, 0.08)));
@@ -128,7 +128,7 @@ GameEngine.prototype.computeBallsCollisions = function () {
             for (k = 0; k < raysOrigin.length; k++) {
                 this.rayCaster.set(raysOrigin[k], ball.velocity);
                 intersects = this.rayCaster.intersectObjects(objects);
-                if (intersects.length > 0) {
+                if (intersects.length > 0 && intersects[0].distance < size.width / 2) {
                     this.handleBallCollision(intersects);
                 }
             }
@@ -138,4 +138,8 @@ GameEngine.prototype.computeBallsCollisions = function () {
 
 GameEngine.prototype.handleBallCollision = function (objects) {
     "use strict";
+    var normal, velocity;
+    normal = objects[0].face.normal;
+    this.gameState.balls[0].velocity.reflect(normal);
+    this.gameState.balls[0].velocity.negate();
 };
