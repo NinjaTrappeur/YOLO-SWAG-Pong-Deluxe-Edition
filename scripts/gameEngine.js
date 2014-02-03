@@ -3,21 +3,31 @@
  * It needs a GameState to compute it.
  */
 
+/*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
+Obstacle, THREEx*/
+
+/*jslint plusplus: true */
+
 var GameEngine = function (gameState) {
     "use strict";
     if (gameState instanceof GameState) {
         this.gameState = gameState;
         
         gameState.addBall(new Ball(new Position(0, 0, 0.04), new Size(0.08, 0.08)));
-        gameState.balls[0].velocity.set(-0.002, -0.001, 0);
+        gameState.balls[0].velocity.set(-0.002, -0.002, 0);
         gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.4, 0.08),
                                  0, gameState.arena.size.width / 2));
         gameState.bats[0].velocity.set(0.001, 0.001, 0);
-        gameState.addObstacle(new Obstacle(new Position(-0.2, 0.2, 0.04), new Size(0.08, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(0.3, 0.4, 0.04), new Size(0.08, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(0.5, -0.6, 0.04), new Size(0.1, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(-0.3, -0.9, 0.04), new Size(0.25, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(0, -0.2, 0.04), new Size(0.25, 0.08)));
+        gameState.addObstacle(new Obstacle(new Position(-0.2, 0.2, 0.04),
+                                           new Size(0.08, 0.08)));
+        gameState.addObstacle(new Obstacle(new Position(0.3, 0.4, 0.04),
+                                           new Size(0.08, 0.08)));
+        gameState.addObstacle(new Obstacle(new Position(0.5, -0.6, 0.04),
+                                           new Size(0.1, 0.08)));
+        gameState.addObstacle(new Obstacle(new Position(-0.3, -0.9, 0.04),
+                                           new Size(0.25, 0.08)));
+        gameState.addObstacle(new Obstacle(new Position(0, -0.2, 0.04),
+                                           new Size(0.25, 0.08)));
         
         
         
