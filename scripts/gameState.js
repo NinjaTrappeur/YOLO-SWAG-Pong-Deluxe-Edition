@@ -105,7 +105,7 @@ extendClass(Bat, MovingGameObject);
 
 Bat.prototype.moveLeft = function (step) {
     "use strict";
-    if (Math.abs(this.velocity.x) - step >= this.velocityMax) {
+    if (Math.abs(this.velocity.x) - step > this.velocityMax) {
         this.velocity.x = -this.velocityMax;
     } else {
         this.velocity.x -= step;
@@ -114,7 +114,7 @@ Bat.prototype.moveLeft = function (step) {
 
 Bat.prototype.moveRight = function (step) {
     "use strict";
-    if (this.velocity.x + step >= this.velocityMax) {
+    if (this.velocity.x + step > this.velocityMax) {
         this.velocity.x = this.velocityMax;
     } else {
         this.velocity.x += step;

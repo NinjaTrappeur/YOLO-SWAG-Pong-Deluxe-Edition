@@ -17,7 +17,7 @@ var GameEngine = function (gameState) {
         gameState.balls[0].velocity.set(-0.002, -0.002, 0);
         gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.4, 0.08),
                                  0, gameState.arena.size.width / 2));
-        gameState.bats[0].velocity.set(0.001, 0.001, 0);
+        gameState.bats[0].velocity.set(0, 0.001, 0);
         gameState.addObstacle(new Obstacle(new Position(-0.2, 0.2, 0.04),
                                            new Size(0.08, 0.08)));
         gameState.addObstacle(new Obstacle(new Position(0.3, 0.4, 0.04),
@@ -85,16 +85,20 @@ GameEngine.prototype.computeBat = function () {
         bat.position.y -= this.gameState.arena.size.length;
     }
     bat.position.y += bat.velocity.y;
-    if (bat.position.x + bat.size.width + bat.velocity.x  < -this.clearance) {
+    if (bat.position.x + bat.size.width + bat.velocity.x  < -bat.clearance) {
         bat.position.x += 2 * bat.clearance;
-    } else if (bat.position.x + bat.size.width + bat.velocity.x  < -this.clearance) {
+    } else if (bat.position.x  + bat.velocity.x  > bat.clearance) {
         bat.position.x -= 2 * bat.clearance;
     }
-    bat.position.x += bat.velocity.x;
-    if (bat.velocity.x > 0) {
+    if (Math.abs(bat.velocity.x) > this.batStep / 1.9) {
+        bat.position.x += bat.velocity.x;
+    }
+    if (bat.velocity.x > this.batStep / 2.1) {
         bat.velocity.x -= this.batStep / 2;
-    } else if (bat.velocity.x < 0) {
+    } else if (bat.velocity.x < this.batStep / 2.1) {
         bat.velocity.x += this.batStep / 2;
+    } else {
+        bat.velocity.x = 0;
     }
         
     bat.updateMeshPosition();
