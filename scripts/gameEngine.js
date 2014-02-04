@@ -31,12 +31,13 @@ var GameEngine = function (gameState) {
         
         
         
-        this.step = 0.01;
+        this.batStep = 0.001;
         this.keyboard = new THREEx.KeyboardState();
         this.rayCaster = new THREE.Raycaster(new THREE.Vector3(0, 0, 0),
                                              new THREE.Vector3(0, 0, 0),
                                              0,
                                              0.1);
+        this.batInvicibleTime = 0;
         this.running = false;
     } else { throw ("The game engine needs a GameState in parameter."); }
 };
@@ -45,9 +46,9 @@ GameEngine.prototype.computeKeyboard = function () {
     "use strict";
     var bat = this.gameState.bats[0];
     if (this.keyboard.pressed("right")) {
-        bat.moveRight(this.step);
+        bat.moveRight(this.batStep);
     } else if (this.keyboard.pressed("left")) {
-        bat.moveLeft(this.step);
+        bat.moveLeft(this.batStep);
     } else if (this.keyboard.pressed("s")) {
         this.running = true;
     } else if (this.keyboard.pressed("p")) {
@@ -84,6 +85,18 @@ GameEngine.prototype.computeBat = function () {
         bat.position.y -= this.gameState.arena.size.length;
     }
     bat.position.y += bat.velocity.y;
+    if (bat.position.x + bat.size.width + bat.velocity.x  < -this.clearance) {
+        bat.position.x += 2 * bat.clearance;
+    } else if (bat.position.x + bat.size.width + bat.velocity.x  < -this.clearance) {
+        bat.position.x -= 2 * bat.clearance;
+    }
+    bat.position.x += bat.velocity.x;
+    if (bat.velocity.x > 0) {
+        bat.velocity.x -= this.batStep / 2;
+    } else if (bat.velocity.x < 0) {
+        bat.velocity.x += this.batStep / 2;
+    }
+        
     bat.updateMeshPosition();
 };
 
@@ -100,6 +113,23 @@ GameEngine.prototype.compute = function () {
 GameEngine.prototype.computeCollisions = function () {
     "use strict";
     this.computeBallsCollisions();
+    this.computeBatsCollisions();
+};
+
+GameEngine.prototype.computeBatsCollisions = function () {
+    "use strict";
+    var i, j, objects, boundingBox, raysOrigin, bat;
+    objects = [];
+    raysOrigin = [];
+    
+    for (j = 0; j < this.gameState.obstacles.length; ++j) {
+        objects.push(this.gameState.obstacles[j].mesh);
+    }
+    
+    for (i = 0; i < this.gameState.bats[0].mesh.length; i++) {
+        bat = this.gameState.bats[0].mesh[i];
+        
+    }
 };
 
 GameEngine.prototype.computeBallsCollisions = function () {
@@ -111,6 +141,7 @@ GameEngine.prototype.computeBallsCollisions = function () {
     for (j = 0; j < this.gameState.bats[0].mesh.length; ++j) {
         objects.push(this.gameState.bats[0].mesh[j]);
     }
+    
     for (j = 0; j < this.gameState.obstacles.length; ++j) {
         objects.push(this.gameState.obstacles[j].mesh);
     }
@@ -120,8 +151,8 @@ GameEngine.prototype.computeBallsCollisions = function () {
         ball = this.gameState.balls[i];
         size = ball.size;
         ballPos = new THREE.Vector3(ball.position.x,
-                                        ball.position.y,
-                                        ball.position.z);
+                                    ball.position.y,
+                                    ball.position.z);
         raysOrigin.push(new THREE.Vector3(ballPos.x + size.width / 2,
                                           ballPos.y + size.length / 2,
                                           ballPos.z));
@@ -138,7 +169,8 @@ GameEngine.prototype.computeBallsCollisions = function () {
             for (k = 0; k < raysOrigin.length; k++) {
                 this.rayCaster.set(raysOrigin[k], ball.velocity);
                 intersects = this.rayCaster.intersectObjects(objects);
-                if (intersects.length > 0 && intersects[0].distance < size.width / 2) {
+                if (intersects.length > 0 &&
+                        intersects[0].distance < (size.width / 4)) {
                     this.handleBallCollision(intersects);
                 }
             }

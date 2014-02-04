@@ -19,7 +19,6 @@ var GameObject = function (position, size) {
         this.size = size;
         this.name = "Object";
         this.state = "None";
-        this.hideObstacles = false;
     } else {
         throw ("You need to specify position and size parameter to create a GameObject element.");
     }
@@ -86,6 +85,7 @@ var Bat = function (position, size, id, clearance) {
         this.name = "Bat";
         this.mesh = [];
         this.clearance = clearance;
+        this.velocityMax = 0.01;
         geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
                                               this.size.length);
         material = new THREE.MeshBasicMaterial({color: 0xff0000});
@@ -105,18 +105,20 @@ extendClass(Bat, MovingGameObject);
 
 Bat.prototype.moveLeft = function (step) {
     "use strict";
-    if (this.position.x + this.size.width - step < -this.clearance) {
-        this.position.x += 2 * this.clearance;
+    if (Math.abs(this.velocity.x) - step >= this.velocityMax) {
+        this.velocity.x = -this.velocityMax;
+    } else {
+        this.velocity.x -= step;
     }
-    this.position.x -= step;
 };
 
 Bat.prototype.moveRight = function (step) {
     "use strict";
-    if (this.position.x + step > this.clearance) {
-        this.position.x -= 2 * this.clearance;
+    if (this.velocity.x + step >= this.velocityMax) {
+        this.velocity.x = this.velocityMax;
+    } else {
+        this.velocity.x += step;
     }
-    this.position.x += step;
 };
 
 Bat.prototype.updateMeshPosition = function () {

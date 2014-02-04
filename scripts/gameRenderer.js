@@ -77,12 +77,12 @@ extendClass(SimpleRenderer, AbstractRenderer);
 
 SimpleRenderer.prototype.init = function () {
     "use strict";
-    var geometry, material, mesh, bat, ball, i, j,
-        obstacle;
+    var geometry, material, mesh, bat, ball, i, j;
     
     this.camera.lookAt(new THREE.Vector3(0, 0, 1));
     this.camera.position.set(0, -1.7, 0.2);
     this.camera.rotation.set(Math.PI / 2.5, 0, 0);
+    this.obstacles = true;
     
     
     //Creating arena
@@ -104,16 +104,25 @@ SimpleRenderer.prototype.init = function () {
         ball = this.gameState.balls[i];
         this.scene.add(ball.mesh);
     }
-    for (i = 0; i < this.gameState.obstacles.length; i++) {
-        obstacle = this.gameState.obstacles[i];
-        this.scene.add(obstacle.mesh);
-    }
+    
+    this.addObstacles();
     
 };
 
 SimpleRenderer.prototype.render = function () {
     "use strict";
     this.renderer.render(this.scene, this.camera);
+
     this.camera.position.y = this.gameState.bats[0].position.y - 0.3;
     this.camera.position.x = this.gameState.bats[0].position.x + 0.2;
+};
+
+SimpleRenderer.prototype.addObstacles = function () {
+    "use strict";
+    var obstacle, i;
+    for (i = 0; i < this.gameState.obstacles.length; i++) {
+        obstacle = this.gameState.obstacles[i];
+        this.scene.add(obstacle.mesh);
+    }
+    this.obstacles = true;
 };
