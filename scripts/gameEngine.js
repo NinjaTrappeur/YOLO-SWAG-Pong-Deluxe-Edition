@@ -90,17 +90,17 @@ GameEngine.prototype.computeBat = function () {
     } else if (bat.position.x  + bat.velocity.x  > bat.clearance) {
         bat.position.x -= 2 * bat.clearance;
     }
-    if (Math.abs(bat.velocity.x) > this.batStep / 1.9) {
+    if (Math.abs(bat.velocity.x) > this.batStep / 2.9) {
         bat.position.x += bat.velocity.x;
     }
-    if (bat.velocity.x > this.batStep / 2.1) {
-        bat.velocity.x -= this.batStep / 2;
-    } else if (bat.velocity.x < this.batStep / 2.1) {
-        bat.velocity.x += this.batStep / 2;
+    if (bat.velocity.x > this.batStep / 3.1) {
+        bat.velocity.x -= this.batStep / 3;
+    } else if (bat.velocity.x < this.batStep / 3.1) {
+        bat.velocity.x += this.batStep / 3;
     } else {
         bat.velocity.x = 0;
     }
-        
+    
     bat.updateMeshPosition();
 };
 
@@ -120,20 +120,24 @@ GameEngine.prototype.computeCollisions = function () {
     this.computeBatsCollisions();
 };
 
-GameEngine.prototype.computeBatsCollisions = function () {
+
+GameEngine.prototype.createBoxRayOrigin = function (position, size, nbRays) {
     "use strict";
-    var i, j, objects, boundingBox, raysOrigin, bat;
-    objects = [];
-    raysOrigin = [];
-    
-    for (j = 0; j < this.gameState.obstacles.length; ++j) {
-        objects.push(this.gameState.obstacles[j].mesh);
+    var i, j, origins, center, lengths, nbLength;
+    origins = [];
+    center = new THREE.Vector3(position.x, position.y, position.z);
+    origins.push(center);
+    lengths = [-size.length / 2, size.length / 2];
+    for (i = 0; i < lengths.length; i++) {
+        nbLength = lengths[i];
+        for (j = 0; j < nbRays; j++) {
+            origins.push(new THREE.Vector3(j * size.width / nbRays +
+                                           (position.x - size.width / 2),
+                                           position.y + nbLength,
+                                           position.z));
+        }
     }
-    
-    for (i = 0; i < this.gameState.bats[0].mesh.length; i++) {
-        bat = this.gameState.bats[0].mesh[i];
-        
-    }
+    return origins;
 };
 
 GameEngine.prototype.computeBallsCollisions = function () {
@@ -142,12 +146,13 @@ GameEngine.prototype.computeBallsCollisions = function () {
     var objects, j, i, k, ball, ballPos, raysOrigin, size, intersects;
     objects = [];
     raysOrigin = [];
-    for (j = 0; j < this.gameState.bats[0].mesh.length; ++j) {
-        objects.push(this.gameState.bats[0].mesh[j]);
-    }
     
     for (j = 0; j < this.gameState.obstacles.length; ++j) {
         objects.push(this.gameState.obstacles[j].mesh);
+    }
+    
+    for (j = 0; j < this.gameState.bats[0].mesh.length; ++j) {
+        objects.push(this.gameState.bats[0].mesh[j]);
     }
     
     //testing objects
@@ -157,18 +162,7 @@ GameEngine.prototype.computeBallsCollisions = function () {
         ballPos = new THREE.Vector3(ball.position.x,
                                     ball.position.y,
                                     ball.position.z);
-        raysOrigin.push(new THREE.Vector3(ballPos.x + size.width / 2,
-                                          ballPos.y + size.length / 2,
-                                          ballPos.z));
-        raysOrigin.push(new THREE.Vector3(ballPos.x + size.width / 2,
-                                          ballPos.y - size.length / 2,
-                                          ballPos.z));
-        raysOrigin.push(new THREE.Vector3(ballPos.x - size.width / 2,
-                                          ballPos.y - size.length / 2,
-                                          ballPos.z));
-        raysOrigin.push(new THREE.Vector3(ballPos.x - size.width / 2,
-                                          ballPos.y + size.length / 2,
-                                          ballPos.z));
+        raysOrigin = this.createBoxRayOrigin(ball.position, ball.size, 2);
         for (j = 0; j < objects.length; j++) {
             for (k = 0; k < raysOrigin.length; k++) {
                 this.rayCaster.set(raysOrigin[k], ball.velocity);
@@ -182,10 +176,44 @@ GameEngine.prototype.computeBallsCollisions = function () {
     }
 };
 
+
+GameEngine.prototype.computeBatsCollisions = function () {
+    "use strict";
+    var i, j, k, objects, boundingBox, raysOrigin, bat, intersects,
+        size;
+    objects = [];
+
+    for (j = 0; j < this.gameState.obstacles.length; ++j) {
+        objects.push(this.gameState.obstacles[j].mesh);
+    }
+    
+    for (i = 0; i < this.gameState.bats[0].mesh.length; i++) {
+        bat = this.gameState.bats[0];
+        raysOrigin = this.createBoxRayOrigin(bat.position, bat.size, 8);
+        for (j = 0; j < objects.length; j++) {
+            for (k = 0; k < raysOrigin.length; k++) {
+                this.rayCaster.set(raysOrigin[k], bat.velocity);
+                intersects = this.rayCaster.intersectObjects(objects);
+                if (intersects.length > 0 &&
+                        intersects[0].distance < (bat.size.length / 4)) {
+                    this.handleBatCollision(intersects);
+                }
+            }
+        }
+    }
+};
+
+
 GameEngine.prototype.handleBallCollision = function (objects) {
     "use strict";
     var normal, velocity;
     normal = objects[0].face.normal;
     this.gameState.balls[0].velocity.reflect(normal);
     this.gameState.balls[0].velocity.negate();
+};
+
+GameEngine.prototype.handleBatCollision = function (objects) {
+    "use strict";
+    console.log(objects);
+    throw "aie";
 };
