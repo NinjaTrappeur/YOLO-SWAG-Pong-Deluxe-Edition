@@ -37,7 +37,7 @@ var GameEngine = function (gameState) {
                                              new THREE.Vector3(0, 0, 0),
                                              0,
                                              0.1);
-        this.batInvicibleTime = 0;
+        this.batInvincibleTime = 0;
         this.running = false;
     } else { throw ("The game engine needs a GameState in parameter."); }
 };
@@ -180,22 +180,24 @@ GameEngine.prototype.computeBallsCollisions = function () {
 GameEngine.prototype.computeBatsCollisions = function () {
     "use strict";
     var i, j, k, objects, boundingBox, raysOrigin, bat, intersects,
-        size;
+        size, velocity;
     objects = [];
+    velocity = this.gameState.bats[0].velocity;
 
     for (j = 0; j < this.gameState.obstacles.length; ++j) {
         objects.push(this.gameState.obstacles[j].mesh);
     }
     
     for (i = 0; i < this.gameState.bats[0].mesh.length; i++) {
-        bat = this.gameState.bats[0];
-        raysOrigin = this.createBoxRayOrigin(bat.position, bat.size, 8);
+        bat = this.gameState.bats[0].mesh[i];
+        size = new Size(bat.geometry.width, bat.geometry.height);
+        raysOrigin = this.createBoxRayOrigin(bat.position, size, 8);
         for (j = 0; j < objects.length; j++) {
             for (k = 0; k < raysOrigin.length; k++) {
-                this.rayCaster.set(raysOrigin[k], bat.velocity);
+                this.rayCaster.set(raysOrigin[k], velocity);
                 intersects = this.rayCaster.intersectObjects(objects);
                 if (intersects.length > 0 &&
-                        intersects[0].distance < (bat.size.length / 4)) {
+                        intersects[0].distance < (this.gameState.bats[0].size.length / 4)) {
                     this.handleBatCollision(intersects);
                 }
             }
@@ -214,6 +216,5 @@ GameEngine.prototype.handleBallCollision = function (objects) {
 
 GameEngine.prototype.handleBatCollision = function (objects) {
     "use strict";
-    console.log(objects);
     throw "aie";
 };
