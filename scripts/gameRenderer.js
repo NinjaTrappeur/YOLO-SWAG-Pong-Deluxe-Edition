@@ -130,7 +130,7 @@ SimpleRenderer.prototype.render = function () {
         this.gameState.meshesChanged = false;
     }
     this.camera.position.y = this.gameState.bats[0].position.y - 0.3;
-    this.camera.position.x = this.gameState.bats[0].position.x + 0.2;
+    this.camera.position.x = this.gameState.bats[0].position.x + this.gameState.bats[0].size.width / 2;
 };
 
 SimpleRenderer.prototype.addObstacles = function () {
