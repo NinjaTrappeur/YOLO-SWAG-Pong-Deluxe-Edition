@@ -58,7 +58,7 @@ var Obstacle = function (pos, size) {
     GameObject.call(this, pos, size);
     this.name = "Obstacle";
     geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
-                                          this.size.length);
+                                      this.size.length);
     material = new THREE.MeshBasicMaterial({color: 0x00ff00});
     mesh = new THREE.Mesh(geometry,  material);
     mesh.position.x = this.position.x;
@@ -77,7 +77,6 @@ extendClass(Obstacle, GameObject);
 
 var Bat = function (position, size, id, clearance) {
     "use strict";
-    var i, geometry, material, mesh;
     if (typeof id === "number" && typeof clearance === "number") {
         MovingGameObject.call(this, position, size);
         
@@ -86,16 +85,7 @@ var Bat = function (position, size, id, clearance) {
         this.mesh = [];
         this.clearance = clearance;
         this.velocityMax = 0.01;
-        geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
-                                              this.size.length);
-        material = new THREE.MeshBasicMaterial({color: 0xff0000});
-        
-        for (i = 0; i < 3; i++) {
-            mesh = new THREE.Mesh(geometry,  material);
-            mesh.position.y = this.position.y;
-            mesh.position.z = this.position.z;
-            this.mesh.push(mesh);
-        }
+        this.createMeshes();
     } else {
         throw "You need to specify a bat id and a clearance to create a Bat object";
     }
@@ -121,6 +111,22 @@ Bat.prototype.moveRight = function (step) {
     }
 };
 
+Bat.prototype.createMeshes = function () {
+    "use strict";
+    var geometry, material, i, mesh;
+    geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
+                                      this.size.length);
+    material = new THREE.MeshBasicMaterial({color: 0xff0000});
+    this.mesh = [];
+    for (i = 0; i < 3; i++) {
+        mesh = new THREE.Mesh(geometry,  material);
+        mesh.position.y = this.position.y;
+        mesh.position.z = this.position.z;
+        this.mesh.push(mesh);
+    }
+    this.updateMeshPosition();
+};
+
 Bat.prototype.updateMeshPosition = function () {
     "use strict";
     var i;
@@ -142,7 +148,7 @@ var Ball = function (position, size) {
     MovingGameObject.call(this, position, size);
     this.name = "Ball";
     geometry = new THREE.CubeGeometry(this.size.width,
-                                          this.size.length, this.size.width);
+                                      this.size.length, this.size.width);
     material = new THREE.MeshBasicMaterial({color : 0xffffff});
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.x = this.position.x;
@@ -189,6 +195,7 @@ var GameState = function () {
     this.localPlayerId = 0;
     this.players = [];
     this.gameState = "Init";
+    this.meshesChanged = false;
 };
 
 GameState.prototype.addBall = function (ball) {

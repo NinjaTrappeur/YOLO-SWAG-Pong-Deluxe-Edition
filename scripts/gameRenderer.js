@@ -93,12 +93,7 @@ SimpleRenderer.prototype.init = function () {
     this.scene.add(mesh);
     
     //Creating graphics objects.
-    for (i = 0; i < this.gameState.bats.length; i++) {
-        bat = this.gameState.bats[i];
-        for (j = 0; j < bat.mesh.length; j++) {
-            this.scene.add(bat.mesh[j]);
-        }
-    }
+    this.addBatsToScene();
     
     for (i = 0; i < this.gameState.balls.length; i++) {
         ball = this.gameState.balls[i];
@@ -109,10 +104,31 @@ SimpleRenderer.prototype.init = function () {
     
 };
 
+SimpleRenderer.prototype.addBatsToScene = function () {
+    "use strict";
+    var i, j, bat;
+    if (this.bats.length > 0) {
+        for (j = 0; j < this.bats.length; j++) {
+            this.scene.remove(this.bats[j]);
+        }
+    }
+    this.bats = [];
+    for (i = 0; i < this.gameState.bats.length; i++) {
+        bat = this.gameState.bats[i];
+        for (j = 0; j < bat.mesh.length; j++) {
+            this.scene.add(bat.mesh[j]);
+            this.bats.push(bat.mesh[j]);
+        }
+    }
+};
+
 SimpleRenderer.prototype.render = function () {
     "use strict";
     this.renderer.render(this.scene, this.camera);
-
+    if (this.gameState.meshesChanged) {
+        this.addBatsToScene();
+        this.gameState.meshesChanged = false;
+    }
     this.camera.position.y = this.gameState.bats[0].position.y - 0.3;
     this.camera.position.x = this.gameState.bats[0].position.x + 0.2;
 };

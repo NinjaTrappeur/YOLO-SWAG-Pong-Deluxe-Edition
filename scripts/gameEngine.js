@@ -39,6 +39,7 @@ var GameEngine = function (gameState) {
                                              0.1);
         this.batInvincibleTime = 0;
         this.running = false;
+        this.gameOver = false;
     } else { throw ("The game engine needs a GameState in parameter."); }
 };
 
@@ -107,7 +108,10 @@ GameEngine.prototype.computeBat = function () {
 GameEngine.prototype.compute = function () {
     "use strict";
     this.computeKeyboard();
-    if (this.running) {
+    if (this.gameState.bats[0].size.width < 0.1) {
+        this.gameOver = true;
+    }
+    if (this.running && !this.gameOver) {
         this.computeCollisions();
         this.computeBalls();
         this.computeBat();
@@ -117,7 +121,12 @@ GameEngine.prototype.compute = function () {
 GameEngine.prototype.computeCollisions = function () {
     "use strict";
     this.computeBallsCollisions();
-    this.computeBatsCollisions();
+    if (this.batInvincibleTime === 0) {
+        this.computeBatsCollisions();
+    } else {
+        this.batInvincibleTime -= 1;
+    }
+    
 };
 
 
@@ -197,8 +206,12 @@ GameEngine.prototype.computeBatsCollisions = function () {
                 this.rayCaster.set(raysOrigin[k], velocity);
                 intersects = this.rayCaster.intersectObjects(objects);
                 if (intersects.length > 0 &&
-                        intersects[0].distance < (this.gameState.bats[0].size.length / 4)) {
-                    this.handleBatCollision(intersects);
+                        intersects[0].distance < (this.gameState.bats[0].size.length / 4) &&
+                        this.batInvincibleTime === 0) {
+                    this.gameState.bats[0].size.width -= 0.1;
+                    this.gameState.bats[0].createMeshes();
+                    this.gameState.meshesChanged = true;
+                    this.batInvincibleTime = 60;
                 }
             }
         }
@@ -212,9 +225,4 @@ GameEngine.prototype.handleBallCollision = function (objects) {
     normal = objects[0].face.normal;
     this.gameState.balls[0].velocity.reflect(normal);
     this.gameState.balls[0].velocity.negate();
-};
-
-GameEngine.prototype.handleBatCollision = function (objects) {
-    "use strict";
-    throw "aie";
 };
