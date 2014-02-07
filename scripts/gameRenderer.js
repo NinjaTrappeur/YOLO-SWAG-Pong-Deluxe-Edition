@@ -11,6 +11,20 @@ Obstacle, THREEx, Detector, document, window, dat*/
 /*jslint plusplus: true */
 
 
+var Renderer = function (simpleRenderer, torusRenderer) {
+    "use strict";
+    this.renderers = [simpleRenderer, torusRenderer];
+};
+
+Renderer.prototype.set = function (renderer) {
+    "use strict";
+    if (renderer === "SimpleRenderer") {
+        this.activeRenderer = this.renderers[0];
+    } else {
+        this.activeRenderer = this.renderers[1];
+    }
+};
+
 //class AbstractRenderer
 //===================================
 
@@ -41,17 +55,6 @@ var AbstractRenderer = function (gameState) {
     this.scene.add(this.camera);
     this.bats = [];
     this.balls = [];
-    this.gui = new dat.GUI();
-    
-    //Dat gui configuration
-    //------------------------------------------
-    var cameraFolder = this.gui.addFolder("camera");
-    cameraFolder.add(this.camera.position, "x");
-    cameraFolder.add(this.camera.position, "y");
-    cameraFolder.add(this.camera.position, "z");
-    cameraFolder.add(this.camera.rotation, "x", -Math.PI, Math.PI);
-    cameraFolder.add(this.camera.rotation, "y", -Math.PI, Math.PI);
-    cameraFolder.add(this.camera.rotation, "z", -Math.PI, Math.PI);
 };
 
 AbstractRenderer.prototype.render = function () {
