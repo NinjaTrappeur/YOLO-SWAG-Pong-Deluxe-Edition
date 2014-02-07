@@ -20,8 +20,12 @@ var GameEngine = function (gameState) {
         gameState.addBat(new Bat(new Position(-this.gameState.arena.size.width / 2, 0, 0.04),
                                  new Size(this.gameState.arena.size.width, 0.08),
                                  0, gameState.arena.size.width));
+        gameState.addBat(new Bat(new Position(-this.gameState.arena.size.width / 2, this.gameState.bats[0].position.y - 0.1, 0.04),
+                                 new Size(this.gameState.arena.size.width, 0.08),
+                                 0, gameState.arena.size.width));
         gameState.bats[0].velocity.set(0, 0.001, 0);
         gameState.bats[1].velocity.set(0, 0.001, 0);
+        gameState.bats[2].velocity = gameState.bats[0].velocity;
         gameState.addObstacle(new Obstacle(new Position(-0.2, 0.2, 0.04),
                                            new Size(0.08, 0.08)));
         gameState.addObstacle(new Obstacle(new Position(0.3, 0.4, 0.04),
@@ -136,7 +140,6 @@ GameEngine.prototype.computeCollisions = function () {
     } else {
         this.batInvincibleTime -= 1;
     }
-    
 };
 
 
@@ -200,9 +203,13 @@ GameEngine.prototype.computeBallsCollisions = function () {
 GameEngine.prototype.computeBatsCollisions = function () {
     "use strict";
     var i, j, k, objects, boundingBox, raysOrigin, bat, intersects,
-        size, velocity;
+        size, velocity, ball, epsilon;
     objects = [];
     velocity = this.gameState.bats[0].velocity;
+    bat = this.gameState.bats[0];
+    ball = this.gameState.balls[0];
+    epsilon = 0.001;
+    
     
     for (j = 0; j < this.gameState.obstacles.length; ++j) {
         objects.push(this.gameState.obstacles[j].mesh);
@@ -231,8 +238,22 @@ GameEngine.prototype.computeBatsCollisions = function () {
 
 GameEngine.prototype.handleBallCollision = function (objects) {
     "use strict";
-    var normal, velocity;
-    normal = objects[0].face.normal;
-    this.gameState.balls[0].velocity.reflect(normal);
-    this.gameState.balls[0].velocity.negate();
+    if (objects[0].object === this.gameState.bats[2].mesh[0]) {
+        if (this.gameState.bats[0].velocity.y > 0) {
+            this.gameState.bats[2].position.y = this.gameState.bats[0].position.y + 0.1;
+        } else {
+            this.gameState.bats[2].position.y = this.gameState.bats[0].position.y - 0.1;
+        }
+        this.gameState.bats[0].velocity.y *= -1;
+        this.gameState.bats[1].velocity.y *= -1;
+        this.gameState.bats[0].size.width -= 0.01;
+        this.gameState.bats[0].createMeshes();
+        this.gameState.meshesChanged = true;
+        this.batInvincibleTime = 60;
+    } else {
+        var normal, velocity;
+        normal = objects[0].face.normal;
+        this.gameState.balls[0].velocity.reflect(normal);
+        this.gameState.balls[0].velocity.negate();
+    }
 };
