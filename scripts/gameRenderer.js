@@ -14,11 +14,13 @@ Obstacle, THREEx, Detector, document, window, dat*/
 var Renderer = function (simpleRenderer, torusRenderer) {
     "use strict";
     this.renderers = [simpleRenderer, torusRenderer];
+    this.activeRendererString = "SimpleRenderer";
 };
 
-Renderer.prototype.set = function (renderer) {
+Renderer.prototype.setActiveRenderer = function (name) {
     "use strict";
-    if (renderer === "SimpleRenderer") {
+    this.activeRendererString = name;
+    if (this.activeRendererString === "SimpleRenderer") {
         this.activeRenderer = this.renderers[0];
     } else {
         this.activeRenderer = this.renderers[1];
@@ -33,22 +35,15 @@ Renderer.prototype.set = function (renderer) {
  * init method.
  */
 
-var AbstractRenderer = function (gameState) {
+var AbstractRenderer = function (gameState, renderer) {
     "use strict";
-    if (Detector.webgl) {
-        this.renderer = new THREE.WebGLRenderer({antialias: true});
-    } else {
-        document.getElementById('scene').textContent = "Cette application necessite un navigateur supportant webgl";
-        throw ("WebGL not supported.");
-    }
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
-    
+
     if (gameState instanceof GameState) {
         this.gameState = gameState;
     } else {
         throw ("Parameter needs to be a GameState object.");
     }
+    this.renderer = renderer;
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
     this.winResize   = new THREEx.WindowResize(this.renderer, this.camera);
     this.scene = new THREE.Scene();
@@ -68,12 +63,12 @@ AbstractRenderer.prototype.init = function () {
 };
 
 
-// class 2DRenderer: extends AbstractRenderer
+// class SimpleRenderer: extends AbstractRenderer
 //========================================
 
-var SimpleRenderer = function (gameState) {
+var SimpleRenderer = function (gameState, renderer) {
     "use strict";
-    AbstractRenderer.call(this, gameState);
+    AbstractRenderer.call(this, gameState, renderer);
 };
 
 extendClass(SimpleRenderer, AbstractRenderer);
@@ -144,4 +139,49 @@ SimpleRenderer.prototype.addObstacles = function () {
         this.scene.add(obstacle.mesh);
     }
     this.obstacles = true;
+};
+
+
+// class TorusRenderer: extends AbstractRenderer
+//========================================
+var TorusRenderer = function (gameState, renderer) {
+    "use strict";
+    AbstractRenderer.call(this, gameState, renderer);
+    this.radius = 2;
+    this.tubeRadius = 0.8;
+};
+
+extendClass(TorusRenderer, AbstractRenderer);
+
+TorusRenderer.prototype.init = function () {
+    "use strict";
+    var geometry, material, mesh, bat, ball, i, j;
+    
+    this.camera.lookAt(new THREE.Vector3(0, 0, 1));
+    this.camera.position.set(0, -1.7, 0.2);
+    this.camera.rotation.set(Math.PI / 2.5, 0, 0);
+    this.obstacles = true;
+    
+    
+    //Creating arena
+    geometry = new THREE.TorusGeometry(this.radius, this.tubeRadius);
+    material = new THREE.MeshNormalMaterial();
+    mesh = new THREE.Mesh(geometry, material);
+    this.scene.add(mesh);
+    
+    //Creating graphics objects.
+    //this.addBatsToScene();
+    
+/*    for (i = 0; i < this.gameState.balls.length; i++) {
+        ball = this.gameState.balls[i];
+        this.scene.add(ball.mesh);
+    }
+    
+    this.addObstacles();*/
+    
+};
+
+TorusRenderer.prototype.render = function () {
+    "use strict";
+    this.renderer.render(this.scene, this.camera);
 };
