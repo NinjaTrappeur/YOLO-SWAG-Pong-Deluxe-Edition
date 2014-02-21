@@ -1,9 +1,10 @@
 /*global THREEx, GameState, GameEngine, SimpleRenderer, requestAnimationFrame, dat, Renderer, TorusRenderer,
   Detector, THREE, document, window*/
 
-var renderer, gameEngine, gui;
+/*jslint plusplus: true */
 
 
+var renderer, gameEngine, gui, threeRenderer;
 
 function animate() {
     "use strict";
@@ -15,31 +16,32 @@ function animate() {
 function init() {
     "use strict";
     THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
-    var gameState, cameraFolder, rendererFolder, simpleRenderer, torusRenderer, threeRenderDomElement;
+    var gameState, cameraFolder, rendererFolder, simpleRenderer, torusRenderer, i;
     gameState = new GameState();
     gameEngine = new GameEngine(gameState);
     
     if (Detector.webgl) {
-        threeRenderDomElement = new THREE.WebGLRenderer({antialias: true});
+        threeRenderer = new THREE.WebGLRenderer({antialias: true});
     } else {
         document.getElementById('scene').textContent = "Cette application necessite un navigateur supportant webgl";
         throw ("WebGL not supported.");
     }
-    threeRenderDomElement.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(threeRenderDomElement.domElement);
+    threeRenderer.setSize(window.innerWidth, window.innerHeight);
+    threeRenderer.autoClear = true;
+    document.body.appendChild(threeRenderer.domElement);
     
-    simpleRenderer = new SimpleRenderer(gameState, threeRenderDomElement);
-    torusRenderer = new TorusRenderer(gameState, threeRenderDomElement);
+    simpleRenderer = new SimpleRenderer(gameState, threeRenderer);
+    torusRenderer = new TorusRenderer(gameState, threeRenderer);
     renderer = new Renderer(simpleRenderer, torusRenderer);
-    renderer.setActiveRenderer("SimpleRenderer");
+    renderer.setActiveRenderer("TorusRenderer");
     gui = new dat.GUI();
     
     //Dat gui configuration
     //------------------------------------------
     rendererFolder = gui.addFolder("Renderer");
-    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "TorusRenderer"]).onChange(
-        function (value) {renderer.setActiveRenderer(value); }
-    ).name("Renderer");
+    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "TorusRenderer"]).onChange(function (value) {
+        renderer.setActiveRenderer(value);
+    }).name("Renderer");
     cameraFolder = gui.addFolder("Camera");
     cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X");
     cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y");
@@ -48,7 +50,9 @@ function init() {
     cameraFolder.add(renderer.activeRenderer.camera.rotation, "y", -Math.PI, Math.PI).name("Rotation Y");
     cameraFolder.add(renderer.activeRenderer.camera.rotation, "z", -Math.PI, Math.PI).name("Rotation Z");
     
-    renderer.activeRenderer.init();
+    for (i = 0; i < renderer.renderers.length; i++) {
+        renderer.renderers[i].init();
+    }
     animate();
 }
 

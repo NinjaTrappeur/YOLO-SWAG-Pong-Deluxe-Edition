@@ -80,7 +80,6 @@ SimpleRenderer.prototype.init = function () {
     this.camera.lookAt(new THREE.Vector3(0, 0, 1));
     this.camera.position.set(0, -1.7, 0.2);
     this.camera.rotation.set(Math.PI / 2.5, 0, 0);
-    this.obstacles = true;
     
     
     //Creating arena
@@ -138,7 +137,6 @@ SimpleRenderer.prototype.addObstacles = function () {
         obstacle = this.gameState.obstacles[i];
         this.scene.add(obstacle.mesh);
     }
-    this.obstacles = true;
 };
 
 
@@ -157,27 +155,21 @@ TorusRenderer.prototype.init = function () {
     "use strict";
     var geometry, material, mesh, bat, ball, i, j;
     
+    
+    //adjusting camera
     this.camera.lookAt(new THREE.Vector3(0, 0, 1));
-    this.camera.position.set(0, -1.7, 0.2);
-    this.camera.rotation.set(Math.PI / 2.5, 0, 0);
-    this.obstacles = true;
+    this.camera.position.set(0, -4, 0);
+    this.camera.rotation.set(Math.PI / 2, 0, Math.PI / 2);
     
     
     //Creating arena
-    geometry = new THREE.TorusGeometry(this.radius, this.tubeRadius);
+    geometry = new THREE.TorusGeometry(this.radius, this.tubeRadius, 100, 100);
     material = new THREE.MeshNormalMaterial();
     mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(0, 0, 0);
     this.scene.add(mesh);
     
-    //Creating graphics objects.
-    //this.addBatsToScene();
     
-/*    for (i = 0; i < this.gameState.balls.length; i++) {
-        ball = this.gameState.balls[i];
-        this.scene.add(ball.mesh);
-    }
-    
-    this.addObstacles();*/
     
 };
 
