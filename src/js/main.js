@@ -46,9 +46,9 @@ function init() {
     cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X");
     cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y");
     cameraFolder.add(renderer.activeRenderer.camera.position, "z").name("Position Z");
-    cameraFolder.add(renderer.activeRenderer.camera.rotation, "x", -Math.PI, Math.PI).name("Rotation X");
-    cameraFolder.add(renderer.activeRenderer.camera.rotation, "y", -Math.PI, Math.PI).name("Rotation Y");
-    cameraFolder.add(renderer.activeRenderer.camera.rotation, "z", -Math.PI, Math.PI).name("Rotation Z");
+    cameraFolder.add(renderer.activeRenderer.camera.rotation, "x", -Math.PI, Math.PI).name("Rotation X").step(0.01);
+    cameraFolder.add(renderer.activeRenderer.camera.rotation, "y", -Math.PI, Math.PI).name("Rotation Y").step(0.01);
+    cameraFolder.add(renderer.activeRenderer.camera.rotation, "z", -Math.PI, Math.PI).name("Rotation Z").step(0.01);
     
     for (i = 0; i < renderer.renderers.length; i++) {
         renderer.renderers[i].init();

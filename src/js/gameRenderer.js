@@ -6,7 +6,7 @@
  */
 
 /*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
-Obstacle, THREEx, Detector, document, window, dat*/
+Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console*/
 
 /*jslint plusplus: true */
 
@@ -27,7 +27,7 @@ Renderer.prototype.setActiveRenderer = function (name) {
     }
 };
 
-//class AbstractRenderer
+//class AbstractRendererMeshes
 //===================================
 
 /* This class is abstract. You can't use it
@@ -37,14 +37,14 @@ Renderer.prototype.setActiveRenderer = function (name) {
 
 var AbstractRenderer = function (gameState, renderer) {
     "use strict";
-
+    
     if (gameState instanceof GameState) {
         this.gameState = gameState;
     } else {
         throw ("Parameter needs to be a GameState object.");
     }
     this.renderer = renderer;
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
+    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 100);
     this.winResize   = new THREEx.WindowResize(this.renderer, this.camera);
     this.scene = new THREE.Scene();
     this.scene.add(this.camera);
@@ -155,11 +155,13 @@ TorusRenderer.prototype.init = function () {
     "use strict";
     var geometry, material, mesh, bat, ball, i, j;
     
+    //Creating meshes tables
     
-    //adjusting camera
-    this.camera.lookAt(new THREE.Vector3(0, 0, 1));
-    this.camera.position.set(0, -4, 0);
-    this.camera.rotation.set(Math.PI / 2, 0, Math.PI / 2);
+    this.batsMeshes = [];
+    this.ballsMeshes = [];
+    this.addBatsToScene();
+    this.addBallsToScene();
+    this.camera.position.z = 5;
     
     
     //Creating arena
@@ -168,12 +170,52 @@ TorusRenderer.prototype.init = function () {
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(0, 0, 0);
     this.scene.add(mesh);
-    
-    
-    
 };
 
 TorusRenderer.prototype.render = function () {
     "use strict";
     this.renderer.render(this.scene, this.camera);
+    this.updateMeshesPosition();
+};
+
+TorusRenderer.prototype.addBallsToScene = function () {
+    "use strict";
+    var i, mesh, ball;
+    for (i = 0; i < this.gameState.balls.length; i++) {
+        ball = this.gameState.balls[i];
+        mesh = new THREE.Mesh(new THREE.CubeGeometry(ball.size.width, ball.size.length, ball.size.length),
+                              new THREE.MeshBasicMaterial({color : 0xffffff}));
+        this.ballsMeshes.push(mesh);
+        this.scene.add(mesh);
+    }
+};
+
+TorusRenderer.prototype.addBatsToScene = function () {
+    "use strict";
+    var i, bat, mesh;
+    if (this.batsMeshes.length > 0) {
+        for (i = 0; i < this.batsMeshes.length; i++) {
+            this.scene.remove(this.batsMeshes[i]);
+        }
+    }
+    this.batsMeshes = [];
+    bat = this.gameState.bats[0];
+    mesh = new THREE.Mesh(new THREE.CubeGeometry(bat.size.width, bat.size.length, bat.size.length),
+                          new THREE.MeshBasicMaterial({color: 0xff0000}));
+    mesh.position = toTorusCoordinates(this.gameState.bats[0].position.x, this.gameState.bats[0].position.y,
+                                       this.radius, this.tubeRadius);
+    mesh.position.set(0, 0, 0);
+    this.scene.add(mesh);
+    this.batsMeshes.push(mesh);
+};
+
+TorusRenderer.prototype.updateMeshesPosition = function () {
+    "use strict";
+    var i, ball;
+    this.batsMeshes[0].position = toTorusCoordinates(this.gameState.bats[0].position.x, this.gameState.bats[0].position.y,
+                                                     this.radius, this.tubeRadius);
+    for (i = 0; i < this.ballsMeshes.length; i++) {
+        ball = this.gameState.balls[i];
+        this.ballsMeshes[i].position = toTorusCoordinates(ball.position.x, ball.position.y, this.radius, this.tubeRadius);
+    }
 };

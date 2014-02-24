@@ -4,7 +4,7 @@
  */
 
 /*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
-Obstacle, THREEx*/
+Obstacle, THREEx, console*/
 
 /*jslint plusplus: true */
 
@@ -226,6 +226,7 @@ GameEngine.prototype.computeBatsCollisions = function () {
                     intersects[0].distance < (this.gameState.bats[0].size.length / 4) &&
                     this.batInvincibleTime === 0) {
                 this.gameState.bats[0].size.width -= 0.1;
+                console.log("Bat collision!");
                 this.gameState.bats[0].createMeshes();
                 this.gameState.meshesChanged = true;
                 this.batInvincibleTime = 60;
@@ -247,6 +248,7 @@ GameEngine.prototype.handleBallCollision = function (objects) {
         this.gameState.bats[0].velocity.y *= -1;
         this.gameState.bats[1].velocity.y *= -1;
         this.gameState.bats[0].size.width -= 0.01;
+        console.log("Goal!");
         this.gameState.bats[0].createMeshes();
         this.gameState.meshesChanged = true;
         this.batInvincibleTime = 60;
