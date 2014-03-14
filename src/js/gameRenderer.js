@@ -6,7 +6,8 @@
  */
 
 /*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
-Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console*/
+Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console,
+toTorusMatrixTransformation*/
 
 /*jslint plusplus: true */
 
@@ -139,7 +140,6 @@ SimpleRenderer.prototype.addObstacles = function () {
     }
 };
 
-
 // class TorusRenderer: extends AbstractRenderer
 //========================================
 var TorusRenderer = function (gameState, renderer) {
@@ -176,6 +176,7 @@ TorusRenderer.prototype.render = function () {
     "use strict";
     this.renderer.render(this.scene, this.camera);
     this.updateMeshesPosition();
+    this.updateCamera();
 };
 
 TorusRenderer.prototype.addBallsToScene = function () {
@@ -211,11 +212,25 @@ TorusRenderer.prototype.addBatsToScene = function () {
 
 TorusRenderer.prototype.updateMeshesPosition = function () {
     "use strict";
-    var i, ball;
-    this.batsMeshes[0].position = toTorusCoordinates(this.gameState.bats[0].position.x, this.gameState.bats[0].position.y,
-                                                     this.radius, this.tubeRadius);
+    var i, ball, nextPoint, batPosition, transformationMatrix;
+
+    batPosition = this.gameState.bats[0].position;
+    transformationMatrix = toTorusMatrixTransformation(batPosition, this.radius, this.tubeRadius);
+    this.batsMeshes[0].matrix.identity();
+    this.batsMeshes[0].applyMatrix(transformationMatrix);
     for (i = 0; i < this.ballsMeshes.length; i++) {
         ball = this.gameState.balls[i];
-        this.ballsMeshes[i].position = toTorusCoordinates(ball.position.x, ball.position.y, this.radius, this.tubeRadius);
+        this.ballsMeshes[i].position = toTorusCoordinates(ball.position.x,
+                                                          ball.position.y,
+                                                          this.radius,
+                                                          this.tubeRadius);
     }
+};
+
+TorusRenderer.prototype.updateCamera = function () {
+    "use strict";
+    var batPosition;
+    batPosition = this.gameState.bats[0].position;
+    this.camera.position = toTorusCoordinates(batPosition.x, batPosition.y - 0.1, this.radius, this.tubeRadius + 0.4);
+    this.camera.lookAt(this.batsMeshes[0].position);
 };

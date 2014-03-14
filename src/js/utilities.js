@@ -106,3 +106,24 @@ var toTorusCoordinates = function (x, y, radius, tubeRadius) {
     vector = new THREE.Vector3(x2, y2, z2);
     return vector;
 };
+
+var toTorusMatrixTransformation = function (position2D, radius, tubeRadius) {
+    "use strict";
+    
+    var nextPositionOnTorus, batPositionOnTorus, rotateVector, transformationMatrix, torusMatrix;
+    transformationMatrix = new THREE.Matrix4();
+    torusMatrix = new THREE.Matrix4();
+    nextPositionOnTorus = toTorusCoordinates(position2D.x, position2D.y + 0.01, radius, tubeRadius);
+    batPositionOnTorus = toTorusCoordinates(position2D.x, position2D.y, radius, tubeRadius);
+    rotateVector = new THREE.Vector3(nextPositionOnTorus.x - batPositionOnTorus.x,
+                                 nextPositionOnTorus.y - batPositionOnTorus.y,
+                                 nextPositionOnTorus.z - batPositionOnTorus.z);
+
+    transformationMatrix.makeTranslation(batPositionOnTorus.x, batPositionOnTorus.y, batPositionOnTorus.z);
+    torusMatrix.makeRotationAxis(rotateVector.normalize(), -((2 * position2D.x) + 1) * Math.PI + Math.PI / 2);
+    transformationMatrix.multiply(torusMatrix);
+    torusMatrix.makeRotationZ((position2D.y + 1) * Math.PI);
+    transformationMatrix.multiply(torusMatrix);
+
+    return transformationMatrix;
+};
