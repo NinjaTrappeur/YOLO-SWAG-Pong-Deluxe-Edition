@@ -153,7 +153,7 @@ extendClass(TorusRenderer, AbstractRenderer);
 
 TorusRenderer.prototype.init = function () {
     "use strict";
-    var geometry, material, mesh, bat, ball, i, j;
+    var geometry, material, mesh;
     
     //Creating meshes tables
     
@@ -178,7 +178,7 @@ TorusRenderer.prototype.render = function () {
     "use strict";
     this.renderer.render(this.scene, this.camera);
     this.updateMeshesPosition();
-    //this.updateCamera();
+    this.updateCamera();
 };
 
 TorusRenderer.prototype.addBallsToScene = function () {
@@ -217,7 +217,7 @@ TorusRenderer.prototype.addObstaclesToScene = function () {
     var i, obstacle, mesh;
     for (i = 0; i < this.gameState.obstacles.length; i++) {
         obstacle = this.gameState.obstacles[i];
-        mesh = new THREE.Mesh(new THREE.CubeGeometry(obstacle.size.width, obstacle.size.length),
+        mesh = new THREE.Mesh(new THREE.CubeGeometry(obstacle.size.width, obstacle.size.length, obstacle.size.length),
                               new THREE.MeshBasicMaterial({color : 0xff0000}));
         this.obstaclesMeshes.push(mesh);
         this.scene.add(mesh);
@@ -241,7 +241,6 @@ TorusRenderer.prototype.updateMeshesPosition = function () {
         this.ballsMeshes[i].applyMatrix(transformationMatrix);
     }
     for (i = 0; i < this.obstaclesMeshes.length; i++) {
-        console.log("updaté");
         meshPosition = this.gameState.obstacles[i].position;
         this.obstaclesMeshes[i].matrix.identity();
         transformationMatrix = toTorusMatrixTransformation(meshPosition, this.radius,
