@@ -107,6 +107,15 @@ var toTorusCoordinates = function (x, y, radius, tubeRadius) {
     return vector;
 };
 
+var toTorusMeshSize = function (planeMeshSize, arenaSize, tubeRadius, toreRadius) {
+    "use strict";
+    
+    var torusWidth, torusLength;
+    torusWidth = (planeMeshSize.width * 2 * Math.PI * tubeRadius) / arenaSize.width;
+    torusLength = (planeMeshSize.length * 2 * Math.PI * toreRadius) / arenaSize.length;
+    return new Size(torusWidth, torusLength);
+};
+
 var toTorusMatrixTransformation = function (position2D, radius, tubeRadius) {
     "use strict";
     

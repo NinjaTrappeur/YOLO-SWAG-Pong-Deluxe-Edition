@@ -7,7 +7,7 @@
 
 /*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
 Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console,
-toTorusMatrixTransformation*/
+toTorusMatrixTransformation, toTorusMeshSize*/
 
 /*jslint plusplus: true */
 
@@ -147,6 +147,8 @@ var TorusRenderer = function (gameState, renderer) {
     AbstractRenderer.call(this, gameState, renderer);
     this.radius = 2;
     this.tubeRadius = 0.8;
+    this.meshHeigth = 0.1;
+
 };
 
 extendClass(TorusRenderer, AbstractRenderer);
@@ -183,10 +185,14 @@ TorusRenderer.prototype.render = function () {
 
 TorusRenderer.prototype.addBallsToScene = function () {
     "use strict";
-    var i, mesh, ball;
+    var i, mesh, ball, meshSize;
     for (i = 0; i < this.gameState.balls.length; i++) {
         ball = this.gameState.balls[i];
-        mesh = new THREE.Mesh(new THREE.CubeGeometry(ball.size.width, ball.size.length, ball.size.length),
+        meshSize = toTorusMeshSize(ball.size, this.gameState.arena.size,
+                                  this.tubeRadius, this.radius);
+        mesh = new THREE.Mesh(new THREE.CubeGeometry(meshSize.width,
+                                                     meshSize.length,
+                                                     this.meshHeigth),
                               new THREE.MeshBasicMaterial({color : 0x00ff00}));
         this.ballsMeshes.push(mesh);
         this.scene.add(mesh);
@@ -195,7 +201,7 @@ TorusRenderer.prototype.addBallsToScene = function () {
 
 TorusRenderer.prototype.addBatsToScene = function () {
     "use strict";
-    var i, bat, mesh;
+    var i, bat, mesh, meshSize;
     if (this.batsMeshes.length > 0) {
         for (i = 0; i < this.batsMeshes.length; i++) {
             this.scene.remove(this.batsMeshes[i]);
@@ -203,8 +209,13 @@ TorusRenderer.prototype.addBatsToScene = function () {
     }
     this.batsMeshes = [];
     bat = this.gameState.bats[0];
-    mesh = new THREE.Mesh(new THREE.CubeGeometry(bat.size.width, bat.size.length, bat.size.length),
-                          new THREE.MeshBasicMaterial({color: 0x000000}));
+    meshSize = toTorusMeshSize(bat.size,
+                                 this.gameState.arena.size,
+                                 this.tubeRadius, this.radius);
+    mesh = new THREE.Mesh(new THREE.CubeGeometry(meshSize.width,
+                                                 meshSize.length,
+                                                 this.meshHeigth),
+                          new THREE.MeshBasicMaterial({color: 0xffffff}));
     mesh.position = toTorusCoordinates(this.gameState.bats[0].position.x, this.gameState.bats[0].position.y,
                                        this.radius, this.tubeRadius);
     mesh.position.set(0, 0, 0);
@@ -214,10 +225,15 @@ TorusRenderer.prototype.addBatsToScene = function () {
 
 TorusRenderer.prototype.addObstaclesToScene = function () {
     "use strict";
-    var i, obstacle, mesh;
+    var i, obstacle, mesh, meshSize;
     for (i = 0; i < this.gameState.obstacles.length; i++) {
         obstacle = this.gameState.obstacles[i];
-        mesh = new THREE.Mesh(new THREE.CubeGeometry(obstacle.size.width, obstacle.size.length, obstacle.size.length),
+        meshSize = toTorusMeshSize(obstacle.size,
+                                     this.gameState.arena.size,
+                                     this.tubeRadius, this.radius);
+        mesh = new THREE.Mesh(new THREE.CubeGeometry(meshSize.width,
+                                                     meshSize.length,
+                                                     this.meshHeigth),
                               new THREE.MeshBasicMaterial({color : 0xff0000}));
         this.obstaclesMeshes.push(mesh);
         this.scene.add(mesh);

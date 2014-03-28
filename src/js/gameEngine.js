@@ -15,7 +15,7 @@ var GameEngine = function (gameState) {
         
         gameState.addBall(new Ball(new Position(0, 0, 0.04), new Size(0.08, 0.08)));
         gameState.balls[0].velocity.set(-0.002, -0.002, 0);
-        gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.4, 0.08),
+        gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.1, 0.08),
                                  0, gameState.arena.size.width / 2));
         gameState.addBat(new Bat(new Position(-this.gameState.arena.size.width / 2, 0, 0.04),
                                  new Size(this.gameState.arena.size.width, 0.08),
