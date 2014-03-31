@@ -12,19 +12,25 @@ toTorusMatrixTransformation, toTorusMeshSize*/
 /*jslint plusplus: true */
 
 
-var Renderer = function (simpleRenderer, torusRenderer) {
+var Renderer = function () {
     "use strict";
-    this.renderers = [simpleRenderer, torusRenderer];
-    this.activeRendererString = "SimpleRenderer";
+    this.renderers = [];
 };
 
 Renderer.prototype.setActiveRenderer = function (name) {
     "use strict";
+    var i, found;
+    found = false;
     this.activeRendererString = name;
-    if (this.activeRendererString === "SimpleRenderer") {
-        this.activeRenderer = this.renderers[0];
-    } else {
-        this.activeRenderer = this.renderers[1];
+    for (i = 0; i < this.renderers.length; i++) {
+        if (this.renderers[i].name === name) {
+            this.activeRenderer = this.renderers[i];
+            console.log(this.renderers[i].name);
+        }
+        found = true;
+    }
+    if (!found) {
+        throw "Game renderer " + name + " undefined.";
     }
 };
 
@@ -51,6 +57,7 @@ var AbstractRenderer = function (gameState, renderer) {
     this.scene.add(this.camera);
     this.bats = [];
     this.balls = [];
+    this.name = "AbstractRenderer";
 };
 
 AbstractRenderer.prototype.render = function () {
@@ -70,6 +77,7 @@ AbstractRenderer.prototype.init = function () {
 var SimpleRenderer = function (gameState, renderer) {
     "use strict";
     AbstractRenderer.call(this, gameState, renderer);
+    this.name = "SimpleRenderer";
 };
 
 extendClass(SimpleRenderer, AbstractRenderer);
@@ -148,6 +156,7 @@ var TorusRenderer = function (gameState, renderer) {
     this.radius = 2;
     this.tubeRadius = 0.8;
     this.meshHeigth = 0.1;
+    this.name = "TorusRenderer";
 
 };
 
@@ -273,3 +282,15 @@ TorusRenderer.prototype.updateCamera = function () {
     this.camera.position = toTorusCoordinates(batPosition.x, batPosition.y - 0.1, this.radius, this.tubeRadius + 0.4);
     this.camera.lookAt(this.batsMeshes[0].position);
 };
+
+
+var CylinderRenderer = function (gameState, renderer) {
+    "use strict";
+    AbstractRenderer.call(this, gameState, renderer);
+    this.tubeLength = 2;
+    this.tubeRadius = 0.8;
+    this.meshHeigth = 0.1;
+
+};
+
+extendClass(CylinderRenderer, AbstractRenderer);

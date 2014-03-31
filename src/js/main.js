@@ -32,8 +32,10 @@ function init() {
     
     simpleRenderer = new SimpleRenderer(gameState, threeRenderer);
     torusRenderer = new TorusRenderer(gameState, threeRenderer);
-    renderer = new Renderer(simpleRenderer, torusRenderer);
-    renderer.setActiveRenderer("TorusRenderer");
+    renderer = new Renderer();
+    renderer.renderers.push(simpleRenderer);
+    renderer.renderers.push(torusRenderer);
+    renderer.setActiveRenderer("SimpleRenderer");
     gui = new dat.GUI();
     
     //Dat gui configuration
