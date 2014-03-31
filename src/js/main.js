@@ -13,10 +13,32 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
+function createDatGui() {
+    "use strict";
+    var rendererFolder, cameraFolder;
+    if (gui !== undefined) {
+        gui.destroy();
+    }
+    gui = new dat.GUI();
+    rendererFolder = gui.addFolder("Renderer");
+    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "TorusRenderer"]).onChange(function (value) {
+        renderer.setActiveRenderer(value);
+        createDatGui();
+    }).name("Renderer");
+    cameraFolder = gui.addFolder("Camera");
+    cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X").listen();
+    cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y").listen();
+    cameraFolder.add(renderer.activeRenderer.camera.position, "z").name("Position Z").listen();
+    cameraFolder.add(renderer.activeRenderer.camera.rotation, "x", -Math.PI, Math.PI).name("Rotation X").step(0.01).listen();
+    cameraFolder.add(renderer.activeRenderer.camera.rotation, "y", -Math.PI, Math.PI).name("Rotation Y").step(0.01).listen();
+    cameraFolder.add(renderer.activeRenderer.camera.rotation, "z", -Math.PI, Math.PI).name("Rotation Z").step(0.01).listen();
+}
+
+
 function init() {
     "use strict";
     THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
-    var gameState, cameraFolder, rendererFolder, simpleRenderer, torusRenderer, i;
+    var gameState, rendererFolder, simpleRenderer, torusRenderer, i;
     gameState = new GameState();
     gameEngine = new GameEngine(gameState);
     
@@ -36,27 +58,17 @@ function init() {
     renderer.renderers.push(simpleRenderer);
     renderer.renderers.push(torusRenderer);
     renderer.setActiveRenderer("SimpleRenderer");
-    gui = new dat.GUI();
     
     //Dat gui configuration
     //------------------------------------------
-    rendererFolder = gui.addFolder("Renderer");
-    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "TorusRenderer"]).onChange(function (value) {
-        renderer.setActiveRenderer(value);
-    }).name("Renderer");
-    cameraFolder = gui.addFolder("Camera");
-    cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X");
-    cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y");
-    cameraFolder.add(renderer.activeRenderer.camera.position, "z").name("Position Z");
-    cameraFolder.add(renderer.activeRenderer.camera.rotation, "x", -Math.PI, Math.PI).name("Rotation X").step(0.01);
-    cameraFolder.add(renderer.activeRenderer.camera.rotation, "y", -Math.PI, Math.PI).name("Rotation Y").step(0.01);
-    cameraFolder.add(renderer.activeRenderer.camera.rotation, "z", -Math.PI, Math.PI).name("Rotation Z").step(0.01);
+    createDatGui();
     
     for (i = 0; i < renderer.renderers.length; i++) {
         renderer.renderers[i].init();
     }
     animate();
 }
+
 
 //Main loop
 function mainLoop() {

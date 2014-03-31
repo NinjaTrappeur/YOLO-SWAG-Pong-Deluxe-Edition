@@ -25,7 +25,6 @@ Renderer.prototype.setActiveRenderer = function (name) {
     for (i = 0; i < this.renderers.length; i++) {
         if (this.renderers[i].name === name) {
             this.activeRenderer = this.renderers[i];
-            console.log(this.renderers[i].name);
         }
         found = true;
     }
