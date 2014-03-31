@@ -15,7 +15,7 @@ var GameEngine = function (gameState) {
         
         gameState.addBall(new Ball(new Position(0, 0, 0.04), new Size(0.08, 0.08)));
         gameState.balls[0].velocity.set(-0.002, -0.002, 0);
-        gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.1, 0.08),
+        gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.4, 0.08),
                                  0, gameState.arena.size.width / 2));
         gameState.addBat(new Bat(new Position(-this.gameState.arena.size.width / 2, 0, 0.04),
                                  new Size(this.gameState.arena.size.width, 0.08),
@@ -45,7 +45,7 @@ var GameEngine = function (gameState) {
                                              new THREE.Vector3(0, 0, 0),
                                              0,
                                              0.1);
-        this.batInvincibleTime = 0;
+        this.batInvincibleTime = -1;
         this.running = false;
         this.gameOver = false;
     } else { throw ("The game engine needs a GameState in parameter."); }
@@ -134,12 +134,12 @@ GameEngine.prototype.compute = function () {
 
 GameEngine.prototype.computeCollisions = function () {
     "use strict";
-    this.computeBallsCollisions();
-    if (this.batInvincibleTime === 0) {
+    if (this.batInvincibleTime < 0) {
         this.computeBatsCollisions();
     } else {
         this.batInvincibleTime -= 1;
     }
+    this.computeBallsCollisions();
 };
 
 
@@ -191,7 +191,7 @@ GameEngine.prototype.computeBallsCollisions = function () {
             this.rayCaster.set(raysOrigin[k], ball.velocity);
             intersects = this.rayCaster.intersectObjects(objects);
             if (intersects.length > 0 &&
-                    intersects[0].distance < (size.width / 4)) {
+                    intersects[0].distance < (size.width / 2)) {
                 this.handleBallCollision(intersects);
             }
             
@@ -224,7 +224,7 @@ GameEngine.prototype.computeBatsCollisions = function () {
             intersects = this.rayCaster.intersectObjects(objects);
             if (intersects.length > 0 &&
                     intersects[0].distance < (this.gameState.bats[0].size.length / 4) &&
-                    this.batInvincibleTime === 0) {
+                    this.batInvincibleTime < 0) {
                 this.gameState.bats[0].size.width -= 0.1;
                 console.log("Bat collision!");
                 this.gameState.bats[0].createMeshes();
@@ -239,6 +239,7 @@ GameEngine.prototype.computeBatsCollisions = function () {
 
 GameEngine.prototype.handleBallCollision = function (objects) {
     "use strict";
+    var ball;
     if (objects[0].object === this.gameState.bats[2].mesh[0]) {
         if (this.gameState.bats[0].velocity.y > 0) {
             this.gameState.bats[2].position.y = this.gameState.bats[0].position.y + 0.1;
@@ -248,14 +249,16 @@ GameEngine.prototype.handleBallCollision = function (objects) {
         this.gameState.bats[0].velocity.y *= -1;
         this.gameState.bats[1].velocity.y *= -1;
         this.gameState.bats[0].size.width -= 0.01;
-        console.log("Goal!");
         this.gameState.bats[0].createMeshes();
         this.gameState.meshesChanged = true;
         this.batInvincibleTime = 60;
     } else {
         var normal, velocity;
         normal = objects[0].face.normal;
-        this.gameState.balls[0].velocity.reflect(normal);
-        this.gameState.balls[0].velocity.negate();
+        ball = this.gameState.balls[0];
+        ball.velocity.reflect(normal);
+        ball.position.x += ball.velocity.x * 4;
+        ball.position.y += ball.velocity.y * 4;
+        ball.updateMesh();
     }
 };
