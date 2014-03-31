@@ -299,23 +299,28 @@ CylinderRenderer.prototype.init = function () {
     "use strict";
     var material;
     this.camera.fov = 200;
+    this.tubeTexture = THREE.ImageUtils.loadTexture("img/grid.jpg");
+    this.tubeTexture.wrapS = THREE.RepeatWrapping;
+    this.tubeTexture.wrapT = THREE.RepeatWrapping;
+    this.tubeTexture.repeat.set(40,40);
     this.camera.updateProjectionMatrix();
-    material = new THREE.MeshNormalMaterial();
+    material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: this.tubeTexture});
     material.side = THREE.DoubleSide;
     this.cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(this.tubeRadius,
                                                               this.tubeRadius,
                                                               this.tubeLength,
-                                                              40,
+                                                              100,
                                                               4,
                                                               true
                                                              ),
                                        material);
     this.scene.add(this.cylinderMesh);
     this.cylinderMesh.doubleSided = true;
-    this.camera.rotation.x -= Math.PI / 2;
+    this.camera.rotation.x = Math.PI / 2;
 };
 
 CylinderRenderer.prototype.render = function () {
     "use strict";
+    this.tubeTexture.offset.y = (this.gameState.bats[0].position.y - 1) / 2;
     this.renderer.render(this.scene, this.camera);
 };
