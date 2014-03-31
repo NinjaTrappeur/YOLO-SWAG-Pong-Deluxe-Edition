@@ -1,5 +1,4 @@
-/*global THREEx, GameState, GameEngine, SimpleRenderer, requestAnimationFrame, dat, Renderer, TorusRenderer,
-  Detector, THREE, document, window*/
+/*global THREEx, GameState, GameEngine, SimpleRenderer, requestAnimationFrame, dat, Renderer, TorusRenderer, CylinderRenderer, Detector, THREE, document, window*/
 
 /*jslint plusplus: true */
 
@@ -21,14 +20,14 @@ function createDatGui() {
     }
     gui = new dat.GUI();
     rendererFolder = gui.addFolder("Renderer");
-    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "TorusRenderer"]).onChange(function (value) {
+    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "CylinderRenderer", "TorusRenderer"]).onChange(function (value) {
         renderer.setActiveRenderer(value);
         createDatGui();
     }).name("Renderer");
     cameraFolder = gui.addFolder("Camera");
-    cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X").listen();
-    cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y").listen();
-    cameraFolder.add(renderer.activeRenderer.camera.position, "z").name("Position Z").listen();
+    cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X");
+    cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y");
+    cameraFolder.add(renderer.activeRenderer.camera.position, "z").name("Position Z");
     cameraFolder.add(renderer.activeRenderer.camera.rotation, "x", -Math.PI, Math.PI).name("Rotation X").step(0.01).listen();
     cameraFolder.add(renderer.activeRenderer.camera.rotation, "y", -Math.PI, Math.PI).name("Rotation Y").step(0.01).listen();
     cameraFolder.add(renderer.activeRenderer.camera.rotation, "z", -Math.PI, Math.PI).name("Rotation Z").step(0.01).listen();
@@ -38,7 +37,7 @@ function createDatGui() {
 function init() {
     "use strict";
     THREEx.FullScreen.bindKey({ charCode : 'f'.charCodeAt(0) });
-    var gameState, rendererFolder, simpleRenderer, torusRenderer, i;
+    var gameState, rendererFolder, simpleRenderer, torusRenderer, i, cylinderRenderer;
     gameState = new GameState();
     gameEngine = new GameEngine(gameState);
     
@@ -53,11 +52,13 @@ function init() {
     document.body.appendChild(threeRenderer.domElement);
     
     simpleRenderer = new SimpleRenderer(gameState, threeRenderer);
+    cylinderRenderer = new CylinderRenderer(gameState, threeRenderer);
     torusRenderer = new TorusRenderer(gameState, threeRenderer);
     renderer = new Renderer();
     renderer.renderers.push(simpleRenderer);
+    renderer.renderers.push(cylinderRenderer);
     renderer.renderers.push(torusRenderer);
-    renderer.setActiveRenderer("SimpleRenderer");
+    renderer.setActiveRenderer("CylinderRenderer");
     
     //Dat gui configuration
     //------------------------------------------

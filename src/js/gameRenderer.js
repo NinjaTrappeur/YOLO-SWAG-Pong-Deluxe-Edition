@@ -282,14 +282,40 @@ TorusRenderer.prototype.updateCamera = function () {
     this.camera.lookAt(this.batsMeshes[0].position);
 };
 
-
+//Class CylinderRenderer: extends AbstractRenderer
+//========================================================
 var CylinderRenderer = function (gameState, renderer) {
     "use strict";
     AbstractRenderer.call(this, gameState, renderer);
-    this.tubeLength = 2;
-    this.tubeRadius = 0.8;
+    this.tubeLength = 4;
+    this.tubeRadius = 1;
     this.meshHeigth = 0.1;
-
+    this.name = "CylinderRenderer";
 };
 
 extendClass(CylinderRenderer, AbstractRenderer);
+
+CylinderRenderer.prototype.init = function () {
+    "use strict";
+    var material;
+    this.camera.fov = 200;
+    this.camera.updateProjectionMatrix();
+    material = new THREE.MeshNormalMaterial();
+    material.side = THREE.DoubleSide;
+    this.cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(this.tubeRadius,
+                                                              this.tubeRadius,
+                                                              this.tubeLength,
+                                                              40,
+                                                              4,
+                                                              true
+                                                             ),
+                                       material);
+    this.scene.add(this.cylinderMesh);
+    this.cylinderMesh.doubleSided = true;
+    this.camera.rotation.x -= Math.PI / 2;
+};
+
+CylinderRenderer.prototype.render = function () {
+    "use strict";
+    this.renderer.render(this.scene, this.camera);
+};
