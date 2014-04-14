@@ -302,7 +302,7 @@ CylinderRenderer.prototype.init = function () {
     this.tubeTexture = THREE.ImageUtils.loadTexture("img/grid.jpg");
     this.tubeTexture.wrapS = THREE.RepeatWrapping;
     this.tubeTexture.wrapT = THREE.RepeatWrapping;
-    this.tubeTexture.repeat.set(40,40);
+    this.tubeTexture.repeat.set(40, 40);
     this.camera.updateProjectionMatrix();
     material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: this.tubeTexture});
     material.side = THREE.DoubleSide;
@@ -323,4 +323,12 @@ CylinderRenderer.prototype.render = function () {
     "use strict";
     this.tubeTexture.offset.y = (this.gameState.bats[0].position.y - 1) / 2;
     this.renderer.render(this.scene, this.camera);
+};
+
+CylinderRenderer.prototype.createGeometry = function (width, length, cylinderRadius) {
+    "use strict";
+    var angle, torusRadius;
+    torusRadius = cylinderRadius - length / 2;
+    angle = width * 2 * Math.PI;
+    return(new THREE.TorusGeometry(torusRadius, length, 4, 200, angle));
 };

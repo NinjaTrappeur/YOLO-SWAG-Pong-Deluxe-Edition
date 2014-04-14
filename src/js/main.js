@@ -58,7 +58,7 @@ function init() {
     renderer.renderers.push(simpleRenderer);
     renderer.renderers.push(cylinderRenderer);
     renderer.renderers.push(torusRenderer);
-    renderer.setActiveRenderer("SimpleRenderer");
+    renderer.setActiveRenderer("CylinderRenderer");
     
     //Dat gui configuration
     //------------------------------------------
