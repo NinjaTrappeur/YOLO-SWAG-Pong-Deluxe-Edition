@@ -329,6 +329,9 @@ CylinderRenderer.prototype.init = function () {
 
 CylinderRenderer.prototype.render = function () {
     "use strict";
+    if(this.gameState.gameState === "running") {
+        this.tubeTexture.offset.y += 0.03;
+    }
     this.handleObstacles();
     this.updateMeshesPosition();
     this.renderer.render(this.scene, this.camera);
