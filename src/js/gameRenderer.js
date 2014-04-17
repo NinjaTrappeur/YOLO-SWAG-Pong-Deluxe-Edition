@@ -288,82 +288,105 @@ TorusRenderer.prototype.updateCamera = function () {
 
 //Class CylinderRenderer: extends AbstractRenderer
 //========================================================
-//var CylinderRenderer = function (gameState, renderer) {
-//    "use strict";
-//    AbstractRenderer.call(this, gameState, renderer);
-//    this.tubeLength = 4;
-//    this.tubeRadius = 1;
-//    this.meshHeigth = 0.1;
-//    this.name = "CylinderRenderer";
-//};
-//
-//extendClass(CylinderRenderer, AbstractRenderer);
-//
-//CylinderRenderer.prototype.init = function () {
-//    "use strict";
-//    var material;
-//    this.camera.fov = 100;
-//    this.tubeTexture = THREE.ImageUtils.loadTexture("img/grid.jpg");
-//    this.tubeTexture.wrapS = THREE.RepeatWrapping;
-//    this.tubeTexture.wrapT = THREE.RepeatWrapping;
-//    this.tubeTexture.repeat.set(40, 40);
-//    this.camera.updateProjectionMatrix();
-//    material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: this.tubeTexture});
-//    material.side = THREE.DoubleSide;
-//    this.cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(this.tubeRadius,
-//                                                              this.tubeRadius,
-//                                                              this.tubeLength,
-//                                                              100,
-//                                                              4,
-//                                                              true
-//                                                             ),
-//                                       material);
-//    this.scene.add(this.cylinderMesh);
-//    this.cylinderMesh.doubleSided = true;
-//    this.camera.position.y = -2;
-//    this.camera.rotation.x = Math.PI / 2;
-//    this.batMesh = this.createBat();
-//    this.scene.add(this.batMesh);
-//    this.updateMeshesPosition();
-//};
-//
-//CylinderRenderer.prototype.render = function () {
-//    "use strict";
-//    if (this.gameState.meshesChanged) {
-//        this.scene.remove(this.batMesh);
-//        this.batMesh = this.createBat();
-//        this.scene.add(this.batMesh);
-//        this.gameState.meshesChanged = false;
-//    }
-//    this.updateMeshesPosition();
-//    this.tubeTexture.offset.y = (this.gameState.bats[0].position.y - 1) / 2;
-//    this.renderer.render(this.scene, this.camera);
-//};
-//
-//CylinderRenderer.prototype.createTorusGeometry = function (width, length, cylinderRadius) {
-//    "use strict";
-//    var angle, torusRadius;
-//    torusRadius = cylinderRadius - length / 2;
-//    angle = width * 2 * Math.PI;
-//    return (new THREE.TorusGeometry(torusRadius, length, 4, 200, angle));
-//};
-//
-//CylinderRenderer.prototype.createBat = function () {
-//    "use strict";
-//    var mesh, geometry, batSize;
-//    batSize = this.gameState.bats[0].size;
-//    geometry = this.createTorusGeometry(batSize.width, this.meshHeigth, this.tubeRadius);
-//    mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0xFFFFFF}));
-//    return mesh;
-//};
-//
-//CylinderRenderer.prototype.updateMeshesPosition = function () {
-//    "use strict";
-//    var transformationMatrix, postition;
-//    postition = this.gameState.bats[0].position;
-//    transformationMatrix = toCylinderMatrixTransformation(new THREE.Vector3(postition.x, -1, 0),
-//                                                                        this.tubeRadius,
-//                                                                        this.tubeLength);
-//    this.batMesh.matrix.identity();
-//    this.batMesh.applyMatrix(transformationMatrix);
-//};
+var CylinderRenderer = function (gameState, renderer) {
+    "use strict";
+    AbstractRenderer.call(this, gameState, renderer);
+    this.tubeLength = 4;
+    this.tubeRadius = 1;
+    this.meshHeigth = 0.1;
+    this.obstacle = {};
+    this.name = "CylinderRenderer";
+};
+
+extendClass(CylinderRenderer, AbstractRenderer);
+
+CylinderRenderer.prototype.init = function () {
+    "use strict";
+    var material;
+    this.camera.fov = 200;
+    this.tubeTexture = THREE.ImageUtils.loadTexture("img/grid.jpg");
+    this.tubeTexture.wrapS = THREE.RepeatWrapping;
+    this.tubeTexture.wrapT = THREE.RepeatWrapping;
+    this.tubeTexture.repeat.set(40, 40);
+    this.camera.updateProjectionMatrix();
+    material = new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: this.tubeTexture});
+    material.side = THREE.DoubleSide;
+    this.cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(this.tubeRadius,
+                                                              this.tubeRadius,
+                                                              this.tubeLength,
+                                                              100,
+                                                              4,
+                                                              true
+                                                             ),
+                                       material);
+    this.scene.add(this.cylinderMesh);
+    this.camera.position.y = -1.1;
+    this.camera.rotation.x = Math.PI / 2;
+    this.batMesh = this.createBat();
+    this.scene.add(this.batMesh);
+    this.updateMeshesPosition();
+};
+
+CylinderRenderer.prototype.render = function () {
+    "use strict";
+    this.handleObstacles();
+    this.updateMeshesPosition();
+    this.renderer.render(this.scene, this.camera);
+};
+
+CylinderRenderer.prototype.createTorusGeometry = function (width, length, cylinderRadius) {
+    "use strict";
+    var angle, torusRadius;
+    torusRadius = cylinderRadius - length / 2;
+    angle = width * 2 * Math.PI;
+    return (new THREE.TorusGeometry(torusRadius, length, 4, 200, angle));
+};
+
+CylinderRenderer.prototype.createBat = function () {
+    "use strict";
+    var mesh, geometry, batSize;
+    batSize = this.gameState.bat.size;
+    geometry = this.createTorusGeometry(batSize.width, this.meshHeigth, this.tubeRadius);
+    mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: 0xFFFFFF}));
+    return mesh;
+};
+
+CylinderRenderer.prototype.updateMeshesPosition = function () {
+    "use strict";
+    var transformationMatrix, position, obstacleId;
+    //Updating bat.
+    position = this.gameState.bat.position;
+    transformationMatrix =
+        toCylinderMatrixTransformation(new THREE.Vector3(position.x, position.y, 0),
+                                       this.tubeRadius, this.tubeLength);
+    this.batMesh.matrix.identity();
+    this.batMesh.applyMatrix(transformationMatrix);
+    for (obstacleId in this.obstacle) {
+        position = this.gameState.obstacles[obstacleId].position;
+        transformationMatrix = toCylinderMatrixTransformation(position, this.tubeRadius, this.tubeLength);
+        this.obstacle[obstacleId].matrix.identity();
+        this.obstacle[obstacleId].applyMatrix(transformationMatrix);
+    }
+};
+
+CylinderRenderer.prototype.handleObstacles = function () {
+    "use strict";
+    var material, geometry, mesh, obstacle;
+    if (this.gameState.popId !== null) {
+        obstacle = this.gameState.obstacles[this.gameState.popId];
+        material = new THREE.MeshBasicMaterial({color : 0xFF0000});
+        geometry = this.createTorusGeometry(obstacle.size.width,
+                                            obstacle.size.length,
+                                            this.tubeRadius);
+        mesh = new THREE.Mesh(geometry, material);
+        this.obstacle[this.gameState.popId] = mesh;
+        this.scene.add(mesh);
+        this.gameState.popId = null;
+    }
+    
+    if (this.gameState.vanishId !== null) {
+        this.scene.remove(this.obstacle[this.gameState.vanishId]);
+        delete this.obstacle[this.gameState.vanishId];
+        this.gameState.vanishId = null;
+    }
+};

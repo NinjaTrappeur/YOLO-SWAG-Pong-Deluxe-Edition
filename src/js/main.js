@@ -52,11 +52,11 @@ function init() {
     document.body.appendChild(threeRenderer.domElement);
     
     simpleRenderer = new SimpleRenderer(gameState, threeRenderer);
-    //cylinderRenderer = new CylinderRenderer(gameState, threeRenderer);
+    cylinderRenderer = new CylinderRenderer(gameState, threeRenderer);
     renderer = new Renderer();
     renderer.renderers.push(simpleRenderer);
-    //renderer.renderers.push(cylinderRenderer);
-    renderer.setActiveRenderer("SimpleRenderer");
+    renderer.renderers.push(cylinderRenderer);
+    renderer.setActiveRenderer("CylinderRenderer");
     
     //Dat gui configuration
     //------------------------------------------

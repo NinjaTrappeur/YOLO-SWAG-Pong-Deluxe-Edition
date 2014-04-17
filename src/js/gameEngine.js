@@ -19,6 +19,7 @@ var GameEngine = function (gameState) {
         this.ymin = -this.gameState.arena.length / 2 - 0.4;
         //When we need to generate a new obstacle.
         this.nextObstaclePositionY = 0;
+        this.obstacleLength = 0.1;
         this.obstaclesVelocity = new THREE.Vector3(0, -0.005, 0);
         this.lastObstacleGenerated = null;
         this.keyboard = new THREEx.KeyboardState();
@@ -28,7 +29,7 @@ var GameEngine = function (gameState) {
 
 GameEngine.prototype.initGame = function () {
     "use strict";
-    this.gameState.bat = new Bat(new THREE.Vector3(0, 0, 0), new Size(0.1, 0.1));
+    this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.1));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
 };
 
@@ -140,11 +141,9 @@ GameEngine.prototype.generateObstacle = function (maxWidth, maxLength, yPos) {
 
     
     width = Math.random() * maxWidth + 0.1;
-    length = Math.random() * maxLength + 0.1;
+    length = this.obstacleLength;
     size = new Size(width, length);
-    console.log(position);
     meshes = this.createMesh(position, size);
-    console.log(meshes[1].position);
     return [meshes, new Size(width, length)];
 };
 
