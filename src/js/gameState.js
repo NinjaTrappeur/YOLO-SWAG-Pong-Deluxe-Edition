@@ -50,6 +50,15 @@ var Arena = function (size) {
 extendClass(Arena, GameObject);
 
 
+//Obstacle class: extends MovingGameObject
+//====================================
+var Obstacle = function (position, size, id) {
+    "use strict";
+    MovingGameObject.call(this, position, size);
+    this.name = "Obstacle";
+    this.id = id;
+};
+
 
 //Bat class: extends MovingGameObject
 //====================================
@@ -62,51 +71,6 @@ var Bat = function (position, size) {
 };
 
 extendClass(Bat, MovingGameObject);
-
-Bat.prototype.moveLeft = function (step) {
-    "use strict";
-    if (Math.abs(this.velocity.x) - step > this.velocityMax) {
-        this.velocity.x = -this.velocityMax;
-    } else {
-        this.velocity.x -= step;
-    }
-};
-
-Bat.prototype.moveRight = function (step) {
-    "use strict";
-    if (this.velocity.x + step > this.velocityMax) {
-        this.velocity.x = this.velocityMax;
-    } else {
-        this.velocity.x += step;
-    }
-};
-
-Bat.prototype.createMeshes = function () {
-    "use strict";
-    var geometry, material, i, mesh;
-    geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
-                                      this.size.length);
-    material = new THREE.MeshBasicMaterial({color: 0xff0000});
-    this.mesh = [];
-    for (i = 0; i < 3; i++) {
-        mesh = new THREE.Mesh(geometry,  material);
-        mesh.position.y = this.position.y;
-        mesh.position.z = this.position.z;
-        this.mesh.push(mesh);
-    }
-    this.updateMeshPosition();
-};
-
-Bat.prototype.updateMeshPosition = function () {
-    "use strict";
-    var i;
-    this.mesh[0].position.x = this.position.x + this.size.width / 2;
-    this.mesh[1].position.x = this.position.x + this.size.width / 2 - 2 * this.clearance;
-    this.mesh[2].position.x = this.position.x + this.size.width / 2 + 2 * this.clearance;
-    for (i = 0; i < this.mesh.length; i++) {
-        this.mesh[i].position.y = this.position.y;
-    }
-};
 
 
 //Ball class: extends MovingGameObject
@@ -160,5 +124,10 @@ var GameState = function () {
     "use strict";
     this.arena = new Arena(new Size(1, 2));
     this.bat = null;
+    this.obstacles = {};
     this.gameState = "Init";
+    //Obstacle vanished
+    this.vanishId = null;
+    //Obstacle popped
+    this.popId = null;
 };

@@ -89,6 +89,7 @@ SimpleRenderer.prototype.init = function () {
     this.camera.position.set(0, -1.7, 0.8);
     this.camera.rotation.set(Math.PI / 2.5, 0, 0);
     
+    this.obstacle = {};
     
     //Creating arena
     geometry = new THREE.PlaneGeometry(this.gameState.arena.size.width,
@@ -101,16 +102,50 @@ SimpleRenderer.prototype.init = function () {
 
 SimpleRenderer.prototype.createBat = function () {
     "use strict";
-    var i, bats;
-    bats = this.gameState.dummyMeshes;
-    console.log(bats.length);
-    for (i = 0; i < bats.length; i++) {
-        this.scene.add(bats[i]);
+    var i, geometry, material, mesh, bat;
+    bat = this.gameState.bat;
+    geometry = new THREE.CubeGeometry(bat.size.width, bat.size.length, bat.size.length);
+    material = new THREE.MeshBasicMaterial();
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position = bat.position;
+    this.batMesh = mesh;
+    this.scene.add(mesh);
+};
+
+SimpleRenderer.prototype.updateMeshes = function () {
+    "use strict";
+    var obstacleId;
+    this.batMesh.position = this.gameState.bat.position;
+    for (obstacleId in this.obstacle) {
+        this.obstacle[obstacleId].position =
+            this.gameState.obstacles[obstacleId].position;
+    }
+};
+
+SimpleRenderer.prototype.handleObstacles = function () {
+    "use strict";
+    var material, geometry, mesh, obstacle;
+    if (this.gameState.popId !== null) {
+        obstacle = this.gameState.obstacles[this.gameState.popId];
+        material = new THREE.MeshBasicMaterial({color : 0x0000FF});
+        geometry = new THREE.CubeGeometry(obstacle.size.width, obstacle.size.length, 0.1);
+        mesh = new THREE.Mesh(geometry, material);
+        this.obstacle[this.gameState.popId] = mesh;
+        this.scene.add(mesh);
+        this.gameState.popId = null;
+    }
+    
+    if (this.gameState.vanishId !== null) {
+        this.scene.remove(this.obstacle[this.gameState.vanishId]);
+        delete this.obstacle[this.gameState.vanishId];
+        this.gameState.vanishId = null;
     }
 };
 
 SimpleRenderer.prototype.render = function () {
     "use strict";
+    this.handleObstacles();
+    this.updateMeshes();
     this.renderer.render(this.scene, this.camera);
 };
 

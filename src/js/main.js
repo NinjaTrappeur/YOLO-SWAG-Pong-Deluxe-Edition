@@ -7,8 +7,8 @@ var renderer, gameEngine, gui, threeRenderer;
 
 function animate() {
     "use strict";
-    renderer.activeRenderer.render();
     gameEngine.compute();
+    renderer.activeRenderer.render();
     requestAnimationFrame(animate);
 }
 
