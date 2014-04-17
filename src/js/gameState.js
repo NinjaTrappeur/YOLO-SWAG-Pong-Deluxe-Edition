@@ -14,7 +14,7 @@
 
 var GameObject = function (position, size) {
     "use strict";
-    if (position instanceof Position && size instanceof Size) {
+    if (position instanceof THREE.Vector3 && size instanceof Size) {
         this.position = position;
         this.size = size;
         this.name = "Object";
@@ -42,7 +42,7 @@ extendClass(MovingGameObject, GameObject);
 
 var Arena = function (size) {
     "use strict";
-    var pos = new Position(0, 0, 0);
+    var pos = new THREE.Vector3(0, 0, 0);
     GameObject.call(this, pos, size);
     this.name = "Arena";
 };
@@ -50,45 +50,15 @@ var Arena = function (size) {
 extendClass(Arena, GameObject);
 
 
-//Obstacle class: extends GameObject
-//================================
-var Obstacle = function (pos, size) {
-    "use strict";
-    var geometry, material, mesh;
-    GameObject.call(this, pos, size);
-    this.name = "Obstacle";
-    geometry = new THREE.CubeGeometry(this.size.width, this.size.length,
-                                      this.size.length);
-    material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    mesh = new THREE.Mesh(geometry,  material);
-    mesh.position.x = this.position.x;
-    mesh.position.y = this.position.y;
-    mesh.position.z = this.position.z;
-    this.mesh = mesh;
-    this.mesh = mesh;
-};
-
-extendClass(Obstacle, GameObject);
-
-
 
 //Bat class: extends MovingGameObject
 //====================================
 
-var Bat = function (position, size, id, clearance) {
+var Bat = function (position, size) {
     "use strict";
-    if (typeof id === "number" && typeof clearance === "number") {
-        MovingGameObject.call(this, position, size);
-        
-        this.id = id;
-        this.name = "Bat";
-        this.mesh = [];
-        this.clearance = clearance;
-        this.velocityMax = 0.01;
-        this.createMeshes();
-    } else {
-        throw "You need to specify a bat id and a clearance to create a Bat object";
-    }
+    MovingGameObject.call(this, position, size);
+    this.name = "Bat";
+    this.velocityMax = 0.01;
 };
 
 extendClass(Bat, MovingGameObject);
@@ -188,48 +158,7 @@ var Player = function (id, name) {
 
 var GameState = function () {
     "use strict";
-    this.bats = [];
-    this.balls = [];
     this.arena = new Arena(new Size(1, 2));
-    this.obstacles = [];
-    this.localPlayerId = 0;
-    this.players = [];
+    this.bat = null;
     this.gameState = "Init";
-    this.meshesChanged = false;
-};
-
-GameState.prototype.addBall = function (ball) {
-    "use strict";
-    if (ball instanceof Ball) {
-        this.balls.push(ball);
-    } else {
-        throw "Wrong paramater type, parameter needs to be a Ball.";
-    }
-};
-
-GameState.prototype.addBat = function (bat) {
-    "use strict";
-    if (bat instanceof Bat) {
-        this.bats.push(bat);
-    } else {
-        throw "Wrong paramater type, parameter needs to be a Bat.";
-    }
-};
-
-GameState.prototype.addPlayer = function (player) {
-    "use strict";
-    if (player instanceof Player) {
-        this.players.push(player);
-    } else {
-        throw ("Parameter needs to be a Player.");
-    }
-};
-
-GameState.prototype.addObstacle = function (obstacle) {
-    "use strict";
-    if (obstacle instanceof Obstacle) {
-        this.obstacles.push(obstacle);
-    } else {
-        throw ("Please give an Obstacle in parameter");
-    }
 };

@@ -12,52 +12,26 @@ var GameEngine = function (gameState) {
     "use strict";
     if (gameState instanceof GameState) {
         this.gameState = gameState;
-        
-        gameState.addBall(new Ball(new Position(0, 0, 0.04), new Size(0.08, 0.08)));
-        gameState.balls[0].velocity.set(-0.002, -0.002, 0);
-        gameState.addBat(new Bat(new Position(-0.2, -0.8, 0.04), new Size(0.4, 0.08),
-                                 0, gameState.arena.size.width / 2));
-        gameState.addBat(new Bat(new Position(-this.gameState.arena.size.width / 2, 0, 0.04),
-                                 new Size(this.gameState.arena.size.width, 0.08),
-                                 0, gameState.arena.size.width));
-        gameState.addBat(new Bat(new Position(-this.gameState.arena.size.width / 2, this.gameState.bats[0].position.y - 0.1, 0.04),
-                                 new Size(this.gameState.arena.size.width, 0.08),
-                                 0, gameState.arena.size.width));
-        gameState.bats[0].velocity.set(0, 0.001, 0);
-        gameState.bats[1].velocity.set(0, 0.001, 0);
-        gameState.bats[2].velocity = gameState.bats[0].velocity;
-        gameState.addObstacle(new Obstacle(new Position(-0.2, 0.2, 0.04),
-                                           new Size(0.08, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(0.3, 0.4, 0.04),
-                                           new Size(0.08, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(0.5, -0.6, 0.04),
-                                           new Size(0.1, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(-0.3, -0.9, 0.04),
-                                           new Size(0.25, 0.08)));
-        gameState.addObstacle(new Obstacle(new Position(0, -0.2, 0.04),
-                                           new Size(0.25, 0.08)));
-        
-        
-        
         this.batStep = 0.001;
         this.keyboard = new THREEx.KeyboardState();
-        this.rayCaster = new THREE.Raycaster(new THREE.Vector3(0, 0, 0),
-                                             new THREE.Vector3(0, 0, 0),
-                                             0,
-                                             0.1);
-        this.batInvincibleTime = -1;
-        this.running = false;
-        this.gameOver = false;
+        this.initGame();
     } else { throw ("The game engine needs a GameState in parameter."); }
+};
+
+GameEngine.prototype.initGame = function () {
+    "use strict";
+    this.gameState.bat = new Bat(new THREE.Vector3(0, 0, 0), new Size(0.1, 0.1));
+    this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
 };
 
 GameEngine.prototype.computeKeyboard = function () {
     "use strict";
-    var bat = this.gameState.bats[0];
     if (this.keyboard.pressed("right")) {
-        bat.moveRight(this.batStep);
+        this.moveMesh(this.bat, new THREE.Vector3(0.01, 0, 0));
+        this.gameState.bat.position = this.bat[1];
     } else if (this.keyboard.pressed("left")) {
-        bat.moveLeft(this.batStep);
+        this.moveMesh(this.bat, new THREE.Vector3(-0.01, 0, 0));
+        this.gameState.bat.position = this.bat[1];
     } else if (this.keyboard.pressed("s")) {
         this.running = true;
     } else if (this.keyboard.pressed("p")) {
@@ -65,200 +39,80 @@ GameEngine.prototype.computeKeyboard = function () {
     }
 };
 
-GameEngine.prototype.computeBalls = function () {
-    "use strict";
-    var ball, i;
-    for (i = 0; i < this.gameState.balls.length; ++i) {
-        ball = this.gameState.balls[i];
-        if (ball.position.x + ball.velocity.x > this.gameState.arena.size.width / 2) {
-            ball.position.x -= this.gameState.arena.size.width;
-        } else if (ball.position.x + ball.velocity.x < -this.gameState.arena.size.width / 2) {
-            ball.position.x += this.gameState.arena.size.width;
-        }
-        ball.position.x += ball.velocity.x;
-        
-        if (ball.position.y + ball.velocity.y > this.gameState.arena.size.length / 2) {
-            ball.position.y -= this.gameState.arena.size.length;
-        } else if (ball.position.y + ball.velocity.y < -this.gameState.arena.size.length / 2) {
-            ball.position.y += this.gameState.arena.size.length;
-        }
-        ball.position.y += ball.velocity.y;
-        ball.updateMesh();
-    }
-};
-
-GameEngine.prototype.computeBat = function () {
-    "use strict";
-    var i, bat;
-    
-    bat = this.gameState.bats[0];
-    if (bat.position.x + bat.size.width + bat.velocity.x  < -bat.clearance) {
-        bat.position.x += 2 * bat.clearance;
-    } else if (bat.position.x  + bat.velocity.x  > bat.clearance) {
-        bat.position.x -= 2 * bat.clearance;
-    }
-    if (Math.abs(bat.velocity.x) > this.batStep / 2.9) {
-        bat.position.x += bat.velocity.x;
-    }
-    if (bat.velocity.x > this.batStep / 3.1) {
-        bat.velocity.x -= this.batStep / 3;
-    } else if (bat.velocity.x < this.batStep / 3.1) {
-        bat.velocity.x += this.batStep / 3;
-    } else {
-        bat.velocity.x = 0;
-    }
-    for (i = 0; i < this.gameState.bats.length; i++) {
-        bat = this.gameState.bats[i];
-        if (bat.position.y + bat.velocity.y > this.gameState.arena.size.length / 2) {
-            bat.position.y -= this.gameState.arena.size.length;
-        } else if (bat.position.y + bat.velocity.y < -this.gameState.arena.size.length / 2) {
-            bat.position.y += this.gameState.arena.size.length;
-        }
-        this.gameState.bats[i].position.y += bat.velocity.y;
-        bat.updateMeshPosition();
-    }
-};
-
 GameEngine.prototype.compute = function () {
     "use strict";
     this.computeKeyboard();
-    if (this.gameState.bats[0].size.width < 0.1) {
-        this.gameOver = true;
-    }
-    if (this.running && !this.gameOver) {
-        this.computeCollisions();
-        this.computeBalls();
-        this.computeBat();
-    }
 };
 
-GameEngine.prototype.computeCollisions = function () {
+//GameEngine.prototype.computeCollisions = function () {
+//    "use strict";
+//    if (this.batInvincibleTime < 0) {
+//        this.computeBatsCollisions();
+//    } else {
+//        this.batInvincibleTime -= 1;
+//    }
+//    this.computeBallsCollisions();
+//};
+
+
+//GameEngine.prototype.createBoxRayOrigin = function (position, size, nbRays) {
+//    "use strict";
+//    var i, j, origins, center, lengths, nbLength;
+//    origins = [];
+//    center = new THREE.Vector3(position.x, position.y, position.z);
+//    origins.push(center);
+//    lengths = [-size.length / 2, size.length / 2];
+//    for (i = 0; i < lengths.length; i++) {
+//        nbLength = lengths[i];
+//        for (j = 0; j < nbRays; j++) {
+//            origins.push(new THREE.Vector3(j * size.width / nbRays +
+//                                           (position.x - size.width / 2),
+//                                           position.y + nbLength,
+//                                           position.z));
+//        }
+//    }
+//    return origins;
+//};
+
+//Meshes handling
+//-------------------
+
+GameEngine.prototype.createMesh = function (position, size) {
     "use strict";
-    if (this.batInvincibleTime < 0) {
-        this.computeBatsCollisions();
+    var i, geometry, material, mesh, meshTab;
+    geometry = new THREE.CubeGeometry(size.width, size.length, size.length);
+    material = new THREE.MeshBasicMaterial();
+    meshTab = [];
+    this.gameState.dummyMeshes = [];
+    for (i = 0; i < 3; i++) {
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = position.x + size.width / 2 +
+            ((-2 * this.gameState.arena.size.width / 2) +
+             (2 * this.gameState.arena.size.width / 2 * i));
+        mesh.position.y = position.y;
+        mesh.position.z = 0;
+        meshTab.push(mesh);
+        this.gameState.dummyMeshes.push(mesh);
+    }
+    return meshTab;
+};
+
+GameEngine.prototype.moveMesh = function (meshes, velocityVector) {
+    "use strict";
+    var arenaWidth, meshX, trueVelocityX, i, mesh;
+    arenaWidth = this.gameState.arena.size.width / 2;
+    meshX = meshes[1].position.x;
+    if (meshX + velocityVector.x < -arenaWidth) {
+        trueVelocityX = arenaWidth * 2 + velocityVector.x;
+    } else if (meshX + velocityVector.x > arenaWidth) {
+        trueVelocityX = velocityVector.x - arenaWidth * 2;
     } else {
-        this.batInvincibleTime -= 1;
+        trueVelocityX = velocityVector.x;
     }
-    this.computeBallsCollisions();
-};
-
-
-GameEngine.prototype.createBoxRayOrigin = function (position, size, nbRays) {
-    "use strict";
-    var i, j, origins, center, lengths, nbLength;
-    origins = [];
-    center = new THREE.Vector3(position.x, position.y, position.z);
-    origins.push(center);
-    lengths = [-size.length / 2, size.length / 2];
-    for (i = 0; i < lengths.length; i++) {
-        nbLength = lengths[i];
-        for (j = 0; j < nbRays; j++) {
-            origins.push(new THREE.Vector3(j * size.width / nbRays +
-                                           (position.x - size.width / 2),
-                                           position.y + nbLength,
-                                           position.z));
-        }
-    }
-    return origins;
-};
-
-GameEngine.prototype.computeBallsCollisions = function () {
-    "use strict";
-    //filling objects to test
-    var objects, j, i, k, ball, ballPos, raysOrigin, size, intersects;
-    objects = [];
-    raysOrigin = [];
-    
-    for (j = 0; j < this.gameState.obstacles.length; ++j) {
-        objects.push(this.gameState.obstacles[j].mesh);
-    }
-    
-    for (i = 0; i < this.gameState.bats.length; i++) {
-        for (j = 0; j < this.gameState.bats[i].mesh.length; j++) {
-            objects.push(this.gameState.bats[i].mesh[j]);
-        }
-    }
-    
-    //testing objects
-    for (i = 0; i < this.gameState.balls.length; ++i) {
-        ball = this.gameState.balls[i];
-        size = ball.size;
-        ballPos = new THREE.Vector3(ball.position.x,
-                                    ball.position.y,
-                                    ball.position.z);
-        raysOrigin = this.createBoxRayOrigin(ball.position, ball.size, 2);
-        for (k = 0; k < raysOrigin.length; k++) {
-            this.rayCaster.set(raysOrigin[k], ball.velocity);
-            intersects = this.rayCaster.intersectObjects(objects);
-            if (intersects.length > 0 &&
-                    intersects[0].distance < (size.width / 2)) {
-                this.handleBallCollision(intersects);
-            }
-            
-        }
-    }
-};
-
-
-GameEngine.prototype.computeBatsCollisions = function () {
-    "use strict";
-    var i, j, k, objects, boundingBox, raysOrigin, bat, intersects,
-        size, velocity, ball, epsilon;
-    objects = [];
-    velocity = this.gameState.bats[0].velocity;
-    bat = this.gameState.bats[0];
-    ball = this.gameState.balls[0];
-    epsilon = 0.001;
-    
-    
-    for (j = 0; j < this.gameState.obstacles.length; ++j) {
-        objects.push(this.gameState.obstacles[j].mesh);
-    }
-    
-    for (i = 0; i < this.gameState.bats[0].mesh.length; i++) {
-        bat = this.gameState.bats[0].mesh[i];
-        size = new Size(bat.geometry.width, bat.geometry.height);
-        raysOrigin = this.createBoxRayOrigin(bat.position, size, 8);
-        for (k = 0; k < raysOrigin.length; k++) {
-            this.rayCaster.set(raysOrigin[k], velocity);
-            intersects = this.rayCaster.intersectObjects(objects);
-            if (intersects.length > 0 &&
-                    intersects[0].distance < (this.gameState.bats[0].size.length / 4) &&
-                    this.batInvincibleTime < 0) {
-                this.gameState.bats[0].size.width -= 0.1;
-                console.log("Bat collision!");
-                this.gameState.bats[0].createMeshes();
-                this.gameState.meshesChanged = true;
-                this.batInvincibleTime = 60;
-            }
-        }
-    }
-    
-};
-
-
-GameEngine.prototype.handleBallCollision = function (objects) {
-    "use strict";
-    var ball;
-    if (objects[0].object === this.gameState.bats[2].mesh[0]) {
-        if (this.gameState.bats[0].velocity.y > 0) {
-            this.gameState.bats[2].position.y = this.gameState.bats[0].position.y + 0.1;
-        } else {
-            this.gameState.bats[2].position.y = this.gameState.bats[0].position.y - 0.1;
-        }
-        this.gameState.bats[0].velocity.y *= -1;
-        this.gameState.bats[1].velocity.y *= -1;
-        this.gameState.bats[0].size.width -= 0.01;
-        this.gameState.bats[0].createMeshes();
-        this.gameState.meshesChanged = true;
-        this.batInvincibleTime = 60;
-    } else {
-        var normal, velocity;
-        normal = objects[0].face.normal;
-        ball = this.gameState.balls[0];
-        ball.velocity.reflect(normal);
-        ball.position.x += ball.velocity.x * 4;
-        ball.position.y += ball.velocity.y * 4;
-        ball.updateMesh();
+    for (i = 0; i < meshes.length; i++) {
+        mesh = meshes[i];
+        mesh.position =
+            new THREE.Vector3(mesh.position.x + trueVelocityX,
+                              mesh.position.y + velocityVector.y, 0);
     }
 };

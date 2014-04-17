@@ -20,7 +20,7 @@ function createDatGui() {
     }
     gui = new dat.GUI();
     rendererFolder = gui.addFolder("Renderer");
-    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "CylinderRenderer", "TorusRenderer"]).onChange(function (value) {
+    rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "CylinderRenderer"]).onChange(function (value) {
         renderer.setActiveRenderer(value);
         createDatGui();
     }).name("Renderer");
@@ -52,13 +52,11 @@ function init() {
     document.body.appendChild(threeRenderer.domElement);
     
     simpleRenderer = new SimpleRenderer(gameState, threeRenderer);
-    cylinderRenderer = new CylinderRenderer(gameState, threeRenderer);
-    torusRenderer = new TorusRenderer(gameState, threeRenderer);
+    //cylinderRenderer = new CylinderRenderer(gameState, threeRenderer);
     renderer = new Renderer();
     renderer.renderers.push(simpleRenderer);
-    renderer.renderers.push(cylinderRenderer);
-    renderer.renderers.push(torusRenderer);
-    renderer.setActiveRenderer("CylinderRenderer");
+    //renderer.renderers.push(cylinderRenderer);
+    renderer.setActiveRenderer("SimpleRenderer");
     
     //Dat gui configuration
     //------------------------------------------

@@ -136,3 +136,21 @@ var toTorusMatrixTransformation = function (position2D, radius, tubeRadius) {
 
     return transformationMatrix;
 };
+
+
+
+var toCylinderMatrixTransformation = function (position2D, tubeRadius, tubeLength) {
+    "use strict";
+    var position3D, angle, transformationMatrix, matrixHelper;
+    angle = position2D.x * 2 * Math.PI;
+    position3D = new THREE.Vector3(tubeRadius * Math.cos(angle),
+                         -1, tubeRadius * Math.sin(angle));
+    transformationMatrix = new THREE.Matrix4();
+    matrixHelper = new THREE.Matrix4();
+    transformationMatrix.makeRotationX(-Math.PI / 2);
+    matrixHelper.makeRotationZ(angle);
+    transformationMatrix.multiply(matrixHelper);
+    matrixHelper.makeTranslation(0, 0, position2D.y);
+    transformationMatrix.multiply(matrixHelper);
+    return transformationMatrix;
+};
