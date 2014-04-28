@@ -150,7 +150,7 @@ var toCylinderMatrixTransformation = function (position2D, tubeRadius, tubeLengt
     transformationMatrix.makeRotationX(-Math.PI / 2);
     matrixHelper.makeRotationZ(angle);
     transformationMatrix.multiply(matrixHelper);
-    matrixHelper.makeTranslation(0, 0, position2D.y);
+    matrixHelper.makeTranslation(0, 0, -position2D.y);
     transformationMatrix.multiply(matrixHelper);
     return transformationMatrix;
 };

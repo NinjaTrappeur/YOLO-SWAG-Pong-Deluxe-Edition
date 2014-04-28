@@ -125,7 +125,7 @@ var GameState = function () {
     this.arena = new Arena(new Size(1, 2));
     this.bat = null;
     this.obstacles = {};
-    this.gameState = "Init";
+    this.gameState = "init";
     //Obstacle vanished
     this.vanishId = null;
     //Obstacle popped

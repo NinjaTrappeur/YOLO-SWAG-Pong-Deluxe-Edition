@@ -19,9 +19,10 @@ var GameEngine = function (gameState) {
         this.ymin = -this.gameState.arena.length / 2 - 0.4;
         //When we need to generate a new obstacle.
         this.nextObstaclePositionY = 0;
-        this.obstacleLength = 0.1;
+        this.obstacleLength = 0.05;
         this.obstaclesVelocity = new THREE.Vector3(0, -0.005, 0);
         this.lastObstacleGenerated = null;
+        this.batInvincibleTime = -1;
         this.keyboard = new THREEx.KeyboardState();
         this.initGame();
     } else { throw ("The game engine needs a GameState in parameter."); }
@@ -29,20 +30,21 @@ var GameEngine = function (gameState) {
 
 GameEngine.prototype.initGame = function () {
     "use strict";
-    this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.1));
+    this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.02));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
 };
 
 GameEngine.prototype.computeKeyboard = function () {
     "use strict";
     if (this.keyboard.pressed("right")) {
-        this.moveMesh(this.bat, new THREE.Vector3(this.batStep, 0, 0));
-        this.gameState.bat.position = this.bat[1].position;
-    } else if (this.keyboard.pressed("left")) {
         this.moveMesh(this.bat, new THREE.Vector3(-this.batStep, 0, 0));
         this.gameState.bat.position = this.bat[1].position;
-    } else if (this.keyboard.pressed("s")) {
-        this.gameState.gameState = "running";
+    } else if (this.keyboard.pressed("left")) {
+        this.moveMesh(this.bat, new THREE.Vector3(this.batStep, 0, 0));
+        this.gameState.bat.position = this.bat[1].position;
+    } else if (this.keyboard.pressed("space")) {
+        this.gameState.gameState = "starting";
+        this.gameState.timeBeforeStart = 132;
     } else if (this.keyboard.pressed("p")) {
         this.gameState.gameState = "paused";
     }
@@ -53,38 +55,43 @@ GameEngine.prototype.compute = function () {
     this.computeKeyboard();
     if (this.gameState.gameState === "running") {
         this.computeObstacles();
+        this.computeCollisions();
     }
 };
 
-//GameEngine.prototype.computeCollisions = function () {
-//    "use strict";
-//    if (this.batInvincibleTime < 0) {
-//        this.computeBatsCollisions();
-//    } else {
-//        this.batInvincibleTime -= 1;
-//    }
-//    this.computeBallsCollisions();
-//};
+GameEngine.prototype.computeCollisions = function () {
+    "use strict";
+    if (this.batInvincibleTime < 0) {
+        this.computeBatCollisions();
+    } else {
+        this.batInvincibleTime -= 1;
+    }
+};
+
+GameEngine.prototype.computeBatCollisions = function () {
+    "use strict";
+    
+};
 
 
-//GameEngine.prototype.createBoxRayOrigin = function (position, size, nbRays) {
-//    "use strict";
-//    var i, j, origins, center, lengths, nbLength;
-//    origins = [];
-//    center = new THREE.Vector3(position.x, position.y, position.z);
-//    origins.push(center);
-//    lengths = [-size.length / 2, size.length / 2];
-//    for (i = 0; i < lengths.length; i++) {
-//        nbLength = lengths[i];
-//        for (j = 0; j < nbRays; j++) {
-//            origins.push(new THREE.Vector3(j * size.width / nbRays +
-//                                           (position.x - size.width / 2),
-//                                           position.y + nbLength,
-//                                           position.z));
-//        }
-//    }
-//    return origins;
-//};
+GameEngine.prototype.createBoxRayOrigin = function (position, size, nbRays) {
+    "use strict";
+    var i, j, origins, center, lengths, nbLength;
+    origins = [];
+    center = new THREE.Vector3(position.x, position.y, position.z);
+    origins.push(center);
+    lengths = [-size.length / 2, size.length / 2];
+    for (i = 0; i < lengths.length; i++) {
+        nbLength = lengths[i];
+        for (j = 0; j < nbRays; j++) {
+            origins.push(new THREE.Vector3(j * size.width / nbRays +
+                                           (position.x - size.width / 2),
+                                           position.y + nbLength,
+                                           position.z));
+        }
+    }
+    return origins;
+};
 
 //Meshes handling
 //-------------------

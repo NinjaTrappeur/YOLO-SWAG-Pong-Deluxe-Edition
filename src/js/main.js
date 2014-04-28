@@ -65,7 +65,7 @@ function init() {
     for (i = 0; i < renderer.renderers.length; i++) {
         renderer.renderers[i].init();
     }
-    animate();
+    gameState.gameState = "waiting";
 }
 
 
