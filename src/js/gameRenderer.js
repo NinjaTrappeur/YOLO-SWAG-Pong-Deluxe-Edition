@@ -346,25 +346,20 @@ CylinderRenderer.prototype.render = function () {
         this.handleObstacles();
     } else if (this.gameState.gameState === "starting") {
         this.gameState.gameState = "waiting start";
-        this.transitionToGameIn(true);
-    } else if (this.gameState.gameState === "waiting start") {
-        this.gameState.timeBeforeStart -= 1;
-        if (this.gameState.timeBeforeStart < 0) {
-            this.camera.fov = 200;
-            this.camera.updateProjectionMatrix();
-        }
+        this.transitionToGameIn();
     }
     this.updateMeshesPosition();
     this.renderer.render(this.scene, this.camera);
 };
 
-CylinderRenderer.prototype.transitionToGameIn = function (startingTween) {
+CylinderRenderer.prototype.transitionToGameIn = function () {
     "use strict";
-    if (startingTween) {
-    this.cameraTween = TweenMax.to(this.camera.position, 2, {x : 0, y : 1.1, z : 0});
-    } else {
-        this.gameState.gameState = "running";
-    }
+    var tween, timeLineIn;
+    tween = TweenMax.to(this.camera.position, 2, {x : 0, y : 1.1, z : 0});
+    timeLineIn = new TimelineLite({onComplete: function () {this.camera.fov = 200; this.camera.updateProjectionMatrix(), this.gameState.gameState = "running"; },
+                                   onCompleteScope: this});
+    timeLineIn.add(tween);
+    timeLineIn.play();
 };
 
 CylinderRenderer.prototype.handleCamera = function () {

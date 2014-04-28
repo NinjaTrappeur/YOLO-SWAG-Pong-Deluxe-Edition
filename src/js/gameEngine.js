@@ -42,7 +42,7 @@ GameEngine.prototype.computeKeyboard = function () {
     } else if (this.keyboard.pressed("left")) {
         this.moveMesh(this.bat, new THREE.Vector3(this.batStep, 0, 0));
         this.gameState.bat.position = this.bat[1].position;
-    } else if (this.keyboard.pressed("space")) {
+    } else if (this.keyboard.pressed("space") && this.gameState.gameState === "waiting") {
         this.gameState.gameState = "starting";
         this.gameState.timeBeforeStart = 132;
     } else if (this.keyboard.pressed("p")) {
