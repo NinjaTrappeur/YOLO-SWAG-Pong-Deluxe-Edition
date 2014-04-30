@@ -103,6 +103,15 @@ SimpleRenderer.prototype.init = function () {
     this.addAllObstacles();
 };
 
+SimpleRenderer.prototype.reset = function () {
+    "use strict";
+    var obstacleId;
+    for (obstacleId in this.obstacle) {
+        this.scene.remove(this.obstacle[obstacleId]);
+        delete this.obstacle[obstacleId];
+    }
+};
+
 SimpleRenderer.prototype.createBat = function () {
     "use strict";
     var i, geometry, material, mesh, bat;
@@ -159,7 +168,10 @@ SimpleRenderer.prototype.addAllObstacles = function () {
 SimpleRenderer.prototype.render = function () {
     "use strict";
     if (this.gameState.gameState === "starting") {
+        this.reset();
         this.gameState.gameState = "running";
+    } else if (this.gameState.gameState === "ending") {
+        this.gameState.gameState = "waiting";
     }
     this.handleObstacles();
     this.updateMeshes();
@@ -188,8 +200,19 @@ CylinderRenderer.prototype.init = function () {
     this.camera.fov = 10;
     this.camera.updateProjectionMatrix();
     this.camera.rotateZ(Math.PI);
+    this.angle = 0;
     this.generateEnvironment();
     this.addAllObstacles();
+};
+
+CylinderRenderer.prototype.reset = function () {
+    "use strict";
+    var obstacleId;
+    for (obstacleId in this.obstacle) {
+        this.scene.remove(this.obstacle[obstacleId]);
+        delete this.obstacle[obstacleId];
+    }
+    
 };
 
 CylinderRenderer.prototype.generateEnvironment = function () {
@@ -224,7 +247,6 @@ CylinderRenderer.prototype.generateEnvironment = function () {
     this.floorMesh2.rotateX(-Math.PI / 2);
     this.scene.add(this.floorMesh1);
     this.scene.add(this.floorMesh2);
-    this.angle = 0;
 };
 
 CylinderRenderer.prototype.render = function () {
@@ -236,6 +258,9 @@ CylinderRenderer.prototype.render = function () {
     } else if (this.gameState.gameState === "starting") {
         this.gameState.gameState = "waiting start";
         this.transitionToGameIn();
+    } else if (this.gameState.gameState === "ending") {
+        this.gameState.gameState = "waiting end";
+        this.transitionToGameOut();
     }
     this.updateMeshesPosition();
     this.renderer.render(this.scene, this.camera);
@@ -247,7 +272,10 @@ CylinderRenderer.prototype.render = function () {
 CylinderRenderer.prototype.transitionToGameIn = function () {
     "use strict";
     var tween, timeLineIn;
-    timeLineIn = new TimelineLite({onComplete: function () {this.camera.fov = 200; this.camera.updateProjectionMatrix(); this.gameState.gameState = "running"; },
+    timeLineIn = new TimelineLite({onComplete: function () {
+        this.gameState.gameState = "running";
+        this.scene.fog = new THREE.Fog(0x000000, 0, 1);
+    },
                                    onCompleteScope: this});
     //Camera movement
     tween = TweenMax.to(this.camera.position, 1, {x : 0, y : 4, z : 0,
@@ -268,6 +296,39 @@ CylinderRenderer.prototype.transitionToGameIn = function () {
     tween = TweenMax.to(this.camera, 1, {fov : 200, onUpdate: function () {this.camera.updateProjectionMatrix(); }, onUpdateScope: this});
     timeLineIn.add(tween, 1);
     timeLineIn.play();
+};
+
+CylinderRenderer.prototype.transitionToGameOut = function () {
+    "use strict";
+    var tween, timeLineOut, ray;
+    ray = 20;
+    timeLineOut = new TimelineLite({onComplete: function () {
+        this.camera.updateProjectionMatrix();
+        this.gameState.gameState = "waiting";
+        this.scene.fog = new THREE.Fog(0x000000, 0, 1);
+        this.reset();
+    },
+                                   onCompleteScope: this});
+    
+    tween = TweenMax.to(this.camera.position, 1, {y : 4, onUpdate : function () { this.camera.lookAt(new THREE.Vector3(0, 0, 0)); },
+                                         onUpdateScope: this});
+    timeLineOut.add(tween, 0);
+    tween = TweenMax.to(this.camera, 1, {fov : 10, onUpdate: function () {this.camera.updateProjectionMatrix(); }, onUpdateScope: this});
+    timeLineOut.add(tween, 0);
+    //Camera movement
+    tween = TweenMax.to(this.camera.position, 1, {x : ray * Math.cos(this.angle), y : 10, z : ray * Math.sin(this.angle),
+                                         onUpdate : function () { this.camera.lookAt(new THREE.Vector3(0, 2, 0)); },
+                                         onUpdateScope: this});
+    timeLineOut.add(tween, 1);
+    
+    //Floor opening
+    tween = TweenMax.to(this.floorMesh1.position, 1, {x : 1});
+    timeLineOut.add(tween, 1);
+    tween = TweenMax.to(this.floorMesh2.position, 1, {x : -1});
+    timeLineOut.add(tween, 1);
+    
+
+    timeLineOut.play();
 };
 
 CylinderRenderer.prototype.handleCamera = function () {
