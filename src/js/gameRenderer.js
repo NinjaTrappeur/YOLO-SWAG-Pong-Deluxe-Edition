@@ -7,7 +7,7 @@
 
 /*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
 Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console,
-toTorusMatrixTransformation, toTorusMeshSize, toCylinderMatrixTransformation*/
+toTorusMatrixTransformation, toTorusMeshSize, toCylinderMatrixTransformation, TimelineLite, TweenMax*/
 
 /*jslint plusplus: true */
 
@@ -144,6 +144,9 @@ SimpleRenderer.prototype.handleObstacles = function () {
 
 SimpleRenderer.prototype.render = function () {
     "use strict";
+    if (this.gameState.gameState === "starting") {
+        this.gameState.gameState = "running";
+    }
     this.handleObstacles();
     this.updateMeshes();
     this.renderer.render(this.scene, this.camera);
@@ -330,11 +333,18 @@ CylinderRenderer.prototype.generateEnvironment = function () {
     this.scene.add(this.cylinderMesh);
     this.batMesh = this.createBat();
     this.scene.add(this.batMesh);
-    this.floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(5, 5),
+    this.floorMesh1 = new THREE.Mesh(new THREE.PlaneGeometry(2, 4),
                                     new THREE.MeshNormalMaterial());
-    this.floorMesh.position.y = 1.5;
-    this.floorMesh.rotateX(-Math.PI / 2);
-    this.scene.add(this.floorMesh);
+    this.floorMesh2 = new THREE.Mesh(new THREE.PlaneGeometry(2, 4),
+                                     new THREE.MeshNormalMaterial());
+    this.floorMesh1.position.x = 1;
+    this.floorMesh2.position.x = -1;
+    this.floorMesh1.position.y = 2.1;
+    this.floorMesh2.position.y = 2.1;
+    this.floorMesh1.rotateX(-Math.PI / 2);
+    this.floorMesh2.rotateX(-Math.PI / 2);
+    this.scene.add(this.floorMesh1);
+    this.scene.add(this.floorMesh2);
     this.angle = 0;
 };
 
@@ -355,10 +365,26 @@ CylinderRenderer.prototype.render = function () {
 CylinderRenderer.prototype.transitionToGameIn = function () {
     "use strict";
     var tween, timeLineIn;
-    tween = TweenMax.to(this.camera.position, 2, {x : 0, y : 1.1, z : 0});
-    timeLineIn = new TimelineLite({onComplete: function () {this.camera.fov = 200; this.camera.updateProjectionMatrix(), this.gameState.gameState = "running"; },
+    timeLineIn = new TimelineLite({onComplete: function () {this.camera.fov = 200; this.camera.updateProjectionMatrix(); this.gameState.gameState = "running"; },
                                    onCompleteScope: this});
-    timeLineIn.add(tween);
+    //Camera movement
+    tween = TweenMax.to(this.camera.position, 1, {x : 0, y : 4, z : 0,
+                                         onUpdate : function () { this.camera.lookAt(new THREE.Vector3(0, 1.1, 0)); },
+                                         onUpdateScope: this});
+    timeLineIn.add(tween, 0);
+    
+    //Floor opening
+    tween = TweenMax.to(this.floorMesh1.position, 1, {x : 2});
+    timeLineIn.add(tween, 0);
+    tween = TweenMax.to(this.floorMesh2.position, 1, {x : -2});
+    timeLineIn.add(tween, 0);
+    
+    //Then we set up final fov and position
+    tween = TweenMax.to(this.camera.position, 1, {y : 1.1, onUpdate : function () { this.camera.lookAt(new THREE.Vector3(0, 0, 0)); },
+                                         onUpdateScope: this});
+    timeLineIn.add(tween, 1);
+    tween = TweenMax.to(this.camera, 1, {fov : 200, onUpdate: function () {this.camera.updateProjectionMatrix(); }, onUpdateScope: this});
+    timeLineIn.add(tween, 1);
     timeLineIn.play();
 };
 
