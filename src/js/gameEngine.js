@@ -36,6 +36,7 @@ GameEngine.prototype.initGame = function () {
     "use strict";
     this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.02));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
+    console.log(this.bat);
 };
 
 GameEngine.prototype.computeKeyboard = function () {
@@ -74,7 +75,8 @@ GameEngine.prototype.computeCollisions = function () {
 
 GameEngine.prototype.computeBatCollisions = function () {
     "use strict";
-    var i, mesh, origins, objects, obstacleGroupId, obstacleGroup, intersects, velocity, posObstacle, posBat;
+    var i, j, mesh, origins, objects, obstacleGroupId, obstacleGroup, intersects,
+        obstacleWidth, batWidth, velocity, posObstacle, posBat;
     velocity = new THREE.Vector3();
     velocity.copy(this.obstaclesVelocity);
     velocity.negate();
@@ -84,14 +86,21 @@ GameEngine.prototype.computeBatCollisions = function () {
         posObstacle = obstacleGroup[0].position.y;
         posBat = this.bat[0].position.y;
         //On regarde si le groupe d'obstacles est susceptible d'entrer en collision avec la raquette.
-        //On utilise la position en y du groupe (qui est le mm pour tous les membres du groupe).
+        //On utilise la position en y du groupe (qui est le mm pour tous les membres du groupe). 
+        
+        obstacleWidth = this.gameState.obstacles[obstacleGroupId].size.width / 4;
+        batWidth = this.gameState.obstacles[obstacleGroupId].size.width / 4;
         if ((posObstacle - this.gameState.obstacles[obstacleGroupId].size.length / 2) < (posBat + this.gameState.bat.size.length / 2) &&
                 posObstacle > (posBat - this.gameState.bat.size.length / 2)) {
             //On vérifie s'il y a collision ou pas à l'aide des coordonées en x.
-            for(i = 0; i < obstacleGroup.length; ++i) {
+            for (i = 0; i < obstacleGroup.length; ++i) {
                 posObstacle = obstacleGroup[i].position.x;
-                for(j = 0; j < this.bat.length; j++) {
+                for (j = 0; j < this.bat.length; j++) {
                     posBat = this.bat[j].position.x;
+                    console.log(posBat);
+                    if (Math.abs(posObstacle - posBat) < (obstacleWidth + batWidth)) {
+                        console.log("collision");
+                    }
                     
                 }
             }
@@ -124,19 +133,29 @@ GameEngine.prototype.createBoxRayOrigin = function (position, size, nbRays) {
 
 GameEngine.prototype.createMesh = function (position, size) {
     "use strict";
-    var i, geometry, material, mesh, meshTab;
+    var i, geometry, material, mesh, meshTab, arenaWidth;
+    arenaWidth = this.gameState.arena.size.width;
     geometry = new THREE.CubeGeometry(size.width, size.length, size.length);
     material = new THREE.MeshBasicMaterial();
     meshTab = [];
     for (i = 0; i < 3; i++) {
         mesh = new THREE.Mesh(geometry, material);
-        mesh.position.x = position.x +
-            ((-2 * this.gameState.arena.size.width / 2 * i) +
-             (2 * this.gameState.arena.size.width / 2 * i));
+        switch (i) {
+        case 0:
+            mesh.position.x = position.x - arenaWidth;
+            break;
+        case 1:
+            mesh.position.x = position.x;
+            break;
+        case 2:
+            mesh.position.x = position.x + arenaWidth;
+            break;
+        }
         mesh.position.y = position.y;
         mesh.position.z = 0;
         meshTab.push(mesh);
     }
+    console.log(meshTab);
     return meshTab;
 };
 
