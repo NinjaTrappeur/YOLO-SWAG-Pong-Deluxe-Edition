@@ -24,6 +24,10 @@ var GameEngine = function (gameState) {
         this.lastObstacleGenerated = null;
         this.batInvincibleTime = -1;
         this.keyboard = new THREEx.KeyboardState();
+        this.rayCaster = new THREE.Raycaster(new THREE.Vector3(0, 0, 0),
+                                             new THREE.Vector3(0, 0, 0),
+                                             0,
+                                             0.1);
         this.initGame();
     } else { throw ("The game engine needs a GameState in parameter."); }
 };
@@ -70,7 +74,29 @@ GameEngine.prototype.computeCollisions = function () {
 
 GameEngine.prototype.computeBatCollisions = function () {
     "use strict";
-    
+    var i, mesh, origins, objects, obstacleGroupId, obstacleGroup, intersects, velocity, posObstacle, posBat;
+    velocity = new THREE.Vector3();
+    velocity.copy(this.obstaclesVelocity);
+    velocity.negate();
+    objects = [];
+    for (obstacleGroupId in this.obstacles) {
+        obstacleGroup = this.obstacles[obstacleGroupId];
+        posObstacle = obstacleGroup[0].position.y;
+        posBat = this.bat[0].position.y;
+        //On regarde si le groupe d'obstacles est susceptible d'entrer en collision avec la raquette.
+        //On utilise la position en y du groupe (qui est le mm pour tous les membres du groupe).
+        if ((posObstacle - this.gameState.obstacles[obstacleGroupId].size.length / 2) < (posBat + this.gameState.bat.size.length / 2) &&
+                posObstacle > (posBat - this.gameState.bat.size.length / 2)) {
+            //On vérifie s'il y a collision ou pas à l'aide des coordonées en x.
+            for(i = 0; i < obstacleGroup.length; ++i) {
+                posObstacle = obstacleGroup[i].position.x;
+                for(j = 0; j < this.bat.length; j++) {
+                    posBat = this.bat[j].position.x;
+                    
+                }
+            }
+        }
+    }
 };
 
 
