@@ -7,7 +7,7 @@
 
 /*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
 Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console,
-toTorusMatrixTransformation, toTorusMeshSize, toCylinderMatrixTransformation, TimelineLite, TweenMax*/
+toTorusMatrixTransformation, toTorusMeshSize, toCylinderMatrixTransformation, TimelineLite, TweenMax, cleanThreeScene*/
 
 /*jslint plusplus: true */
 
@@ -24,6 +24,7 @@ Renderer.prototype.setActiveRenderer = function (name) {
     this.activeRendererString = name;
     for (i = 0; i < this.renderers.length; i++) {
         if (this.renderers[i].name === name) {
+            this.renderers[i].addAllObstacles();
             this.activeRenderer = this.renderers[i];
         }
         found = true;
@@ -84,6 +85,7 @@ extendClass(SimpleRenderer, AbstractRenderer);
 SimpleRenderer.prototype.init = function () {
     "use strict";
     var geometry, material, mesh, bat, ball, i, j;
+    cleanThreeScene(this.scene);
     
     this.camera.lookAt(new THREE.Vector3(0, 0, 1));
     this.camera.position.set(0, -1.7, 0.8);
@@ -94,13 +96,11 @@ SimpleRenderer.prototype.init = function () {
     //Creating arena
     geometry = new THREE.PlaneGeometry(this.gameState.arena.size.width,
                                        this.gameState.arena.size.length);
-    for (i = 0; i < this.gameState.dummy.length; i++) {
-        this.scene.add(this.gameState.dummy[i]);
-    }
     material = new THREE.MeshNormalMaterial();
     mesh = new THREE.Mesh(geometry, material);
     this.scene.add(mesh);
     this.createBat();
+    this.addAllObstacles();
 };
 
 SimpleRenderer.prototype.createBat = function () {
@@ -135,13 +135,24 @@ SimpleRenderer.prototype.handleObstacles = function () {
         mesh = new THREE.Mesh(geometry, material);
         this.obstacle[this.gameState.popId] = mesh;
         this.scene.add(mesh);
-        this.gameState.popId = null;
     }
     
     if (this.gameState.vanishId !== null) {
         this.scene.remove(this.obstacle[this.gameState.vanishId]);
         delete this.obstacle[this.gameState.vanishId];
-        this.gameState.vanishId = null;
+    }
+};
+
+SimpleRenderer.prototype.addAllObstacles = function () {
+    "use strict";
+    var obstacleID, obstacle, material, geometry, mesh;
+    for (obstacleID in this.gameState.obstacles) {
+        obstacle = this.gameState.obstacles[obstacleID];
+        material = new THREE.MeshBasicMaterial({color : 0x0000FF});
+        geometry = new THREE.CubeGeometry(obstacle.size.width, obstacle.size.length, 0.1);
+        mesh = new THREE.Mesh(geometry, material);
+        this.obstacle[obstacleID] = mesh;
+        this.scene.add(mesh);
     }
 };
 
@@ -153,143 +164,6 @@ SimpleRenderer.prototype.render = function () {
     this.handleObstacles();
     this.updateMeshes();
     this.renderer.render(this.scene, this.camera);
-};
-
-
-
-// class TorusRenderer: extends AbstractRenderer
-//========================================
-var TorusRenderer = function (gameState, renderer) {
-    "use strict";
-    AbstractRenderer.call(this, gameState, renderer);
-    this.radius = 2;
-    this.tubeRadius = 0.8;
-    this.meshHeigth = 0.1;
-    this.name = "TorusRenderer";
-
-};
-
-extendClass(TorusRenderer, AbstractRenderer);
-
-TorusRenderer.prototype.init = function () {
-    "use strict";
-    var geometry, material, mesh;
-    
-    //Creating meshes tables
-    
-    this.batsMeshes = [];
-    this.ballsMeshes = [];
-    this.obstaclesMeshes = [];
-    this.addBatsToScene();
-    this.addBallsToScene();
-    this.addObstaclesToScene();
-    this.camera.position.z = 5;
-    
-    
-    //Creating arena
-    geometry = new THREE.TorusGeometry(this.radius, this.tubeRadius, 100, 100);
-    material = new THREE.MeshNormalMaterial();
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(0, 0, 0);
-    this.scene.add(mesh);
-};
-
-TorusRenderer.prototype.render = function () {
-    "use strict";
-    this.renderer.render(this.scene, this.camera);
-    this.updateMeshesPosition();
-    this.updateCamera();
-};
-
-TorusRenderer.prototype.addBallsToScene = function () {
-    "use strict";
-    var i, mesh, ball, meshSize;
-    for (i = 0; i < this.gameState.balls.length; i++) {
-        ball = this.gameState.balls[i];
-        meshSize = toTorusMeshSize(ball.size, this.gameState.arena.size,
-                                  this.tubeRadius, this.radius);
-        mesh = new THREE.Mesh(new THREE.CubeGeometry(meshSize.width,
-                                                     meshSize.length,
-                                                     this.meshHeigth),
-                              new THREE.MeshBasicMaterial({color : 0x00ff00}));
-        this.ballsMeshes.push(mesh);
-        this.scene.add(mesh);
-    }
-};
-
-TorusRenderer.prototype.addBatsToScene = function () {
-    "use strict";
-    var i, bat, mesh, meshSize;
-    if (this.batsMeshes.length > 0) {
-        for (i = 0; i < this.batsMeshes.length; i++) {
-            this.scene.remove(this.batsMeshes[i]);
-        }
-    }
-    this.batsMeshes = [];
-    bat = this.gameState.bats[0];
-    meshSize = toTorusMeshSize(bat.size,
-                                 this.gameState.arena.size,
-                                 this.tubeRadius, this.radius);
-    mesh = new THREE.Mesh(new THREE.CubeGeometry(meshSize.width,
-                                                 meshSize.length,
-                                                 this.meshHeigth),
-                          new THREE.MeshBasicMaterial({color: 0xffffff}));
-    mesh.position = toTorusCoordinates(this.gameState.bats[0].position.x, this.gameState.bats[0].position.y,
-                                       this.radius, this.tubeRadius);
-    mesh.position.set(0, 0, 0);
-    this.scene.add(mesh);
-    this.batsMeshes.push(mesh);
-};
-
-TorusRenderer.prototype.addObstaclesToScene = function () {
-    "use strict";
-    var i, obstacle, mesh, meshSize;
-    for (i = 0; i < this.gameState.obstacles.length; i++) {
-        obstacle = this.gameState.obstacles[i];
-        meshSize = toTorusMeshSize(obstacle.size,
-                                     this.gameState.arena.size,
-                                     this.tubeRadius, this.radius);
-        mesh = new THREE.Mesh(new THREE.CubeGeometry(meshSize.width,
-                                                     meshSize.length,
-                                                     this.meshHeigth),
-                              new THREE.MeshBasicMaterial({color : 0xff0000}));
-        this.obstaclesMeshes.push(mesh);
-        this.scene.add(mesh);
-    }
-};
-
-TorusRenderer.prototype.updateMeshesPosition = function () {
-    "use strict";
-    var i, nextPoint, meshPosition, transformationMatrix;
-
-    meshPosition = this.gameState.bats[0].position;
-    transformationMatrix = toTorusMatrixTransformation(meshPosition,
-                                                       this.radius, this.tubeRadius);
-    this.batsMeshes[0].matrix.identity();
-    this.batsMeshes[0].applyMatrix(transformationMatrix);
-    for (i = 0; i < this.ballsMeshes.length; i++) {
-        meshPosition = this.gameState.balls[i].position;
-        this.ballsMeshes[i].matrix.identity();
-        transformationMatrix = toTorusMatrixTransformation(meshPosition, this.radius,
-                                                           this.tubeRadius);
-        this.ballsMeshes[i].applyMatrix(transformationMatrix);
-    }
-    for (i = 0; i < this.obstaclesMeshes.length; i++) {
-        meshPosition = this.gameState.obstacles[i].position;
-        this.obstaclesMeshes[i].matrix.identity();
-        transformationMatrix = toTorusMatrixTransformation(meshPosition, this.radius,
-                                                           this.tubeRadius);
-        this.obstaclesMeshes[i].applyMatrix(transformationMatrix);
-    }
-    
-};
-
-TorusRenderer.prototype.updateCamera = function () {
-    "use strict";
-    var batPosition;
-    batPosition = this.gameState.bats[0].position;
-    this.camera.position = toTorusCoordinates(batPosition.x, batPosition.y - 0.1, this.radius, this.tubeRadius + 0.4);
-    this.camera.lookAt(this.batsMeshes[0].position);
 };
 
 //Class CylinderRenderer: extends AbstractRenderer
@@ -310,10 +184,12 @@ extendClass(CylinderRenderer, AbstractRenderer);
 CylinderRenderer.prototype.init = function () {
     "use strict";
     var material;
+    cleanThreeScene(this.scene);
     this.camera.fov = 10;
     this.camera.updateProjectionMatrix();
     this.camera.rotateZ(Math.PI);
     this.generateEnvironment();
+    this.addAllObstacles();
 };
 
 CylinderRenderer.prototype.generateEnvironment = function () {
@@ -365,6 +241,9 @@ CylinderRenderer.prototype.render = function () {
     this.renderer.render(this.scene, this.camera);
 };
 
+//Camera and animation stuff
+//==================================================
+
 CylinderRenderer.prototype.transitionToGameIn = function () {
     "use strict";
     var tween, timeLineIn;
@@ -413,10 +292,12 @@ CylinderRenderer.prototype.handleCamera = function () {
     }
 };
 
+//Meshes stuff
+//==================================================================
 CylinderRenderer.prototype.createTorusGeometry = function (width, length, cylinderRadius) {
     "use strict";
     var angle, torusRadius;
-    torusRadius = cylinderRadius - length / 2;
+    torusRadius = cylinderRadius - length / 2 - 0.1;
     angle = width * 2 * Math.PI;
     return (new THREE.TorusGeometry(torusRadius, length, 4, 200, angle));
 };
@@ -437,14 +318,34 @@ CylinderRenderer.prototype.updateMeshesPosition = function () {
     position = this.gameState.bat.position;
     transformationMatrix =
         toCylinderMatrixTransformation(new THREE.Vector3(position.x, position.y, 0),
-                                       this.tubeRadius, this.tubeLength);
+                                       this.tubeRadius, this.tubeLength, this.gameState.bat.size.width);
     this.batMesh.matrix.identity();
     this.batMesh.applyMatrix(transformationMatrix);
     for (obstacleId in this.obstacle) {
         position = this.gameState.obstacles[obstacleId].position;
-        transformationMatrix = toCylinderMatrixTransformation(position, this.tubeRadius, this.tubeLength);
+        transformationMatrix = toCylinderMatrixTransformation(new THREE.Vector3(position.x, position.y, 0),
+                                                              this.tubeRadius, this.tubeLength,
+                                                              this.gameState.obstacles[obstacleId].size.width);
         this.obstacle[obstacleId].matrix.identity();
         this.obstacle[obstacleId].applyMatrix(transformationMatrix);
+    }
+};
+
+//Obstacles stuff
+//===========================================
+
+CylinderRenderer.prototype.addAllObstacles = function () {
+    "use strict";
+    var obstacleID, obstacle, material, geometry, mesh;
+    for (obstacleID in this.gameState.obstacles) {
+        obstacle = this.gameState.obstacles[obstacleID];
+        material = new THREE.MeshBasicMaterial({color : 0xFF0000});
+        geometry = this.createTorusGeometry(obstacle.size.width,
+                                            obstacle.size.length,
+                                            this.tubeRadius);
+        mesh = new THREE.Mesh(geometry, material);
+        this.obstacle[obstacleID] = mesh;
+        this.scene.add(mesh);
     }
 };
 
@@ -460,12 +361,10 @@ CylinderRenderer.prototype.handleObstacles = function () {
         mesh = new THREE.Mesh(geometry, material);
         this.obstacle[this.gameState.popId] = mesh;
         this.scene.add(mesh);
-        this.gameState.popId = null;
     }
     
     if (this.gameState.vanishId !== null) {
         this.scene.remove(this.obstacle[this.gameState.vanishId]);
         delete this.obstacle[this.gameState.vanishId];
-        this.gameState.vanishId = null;
     }
 };

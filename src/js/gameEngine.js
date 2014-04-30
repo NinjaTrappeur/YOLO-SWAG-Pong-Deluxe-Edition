@@ -32,7 +32,6 @@ GameEngine.prototype.initGame = function () {
     "use strict";
     this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.02));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
-    this.gameState.dummy = this.bat;
 };
 
 GameEngine.prototype.computeKeyboard = function () {
@@ -85,7 +84,7 @@ GameEngine.prototype.computeBatCollisions = function () {
         //On utilise la position en y du groupe (qui est le mm pour tous les membres du groupe). 
         
         obstacleWidth = this.gameState.obstacles[obstacleGroupId].size.width / 2;
-        batWidth = this.gameState.obstacles[obstacleGroupId].size.width / 2;
+        batWidth = this.gameState.bat.size.width / 2;
         if ((posObstacle - this.gameState.obstacles[obstacleGroupId].size.length / 2) < (posBat + this.gameState.bat.size.length / 2) 
             && posObstacle > (posBat - this.gameState.bat.size.length / 2)) {
             //On vérifie s'il y a collision ou pas à l'aide des coordonées en x.
@@ -227,6 +226,8 @@ GameEngine.prototype.moveObstacles = function () {
 GameEngine.prototype.computeObstacles = function () {
     "use strict";
     var mesh;
+    this.gameState.popId = null;
+    this.gameState.vanishId = null;
     if (this.lastObstacleGenerated === null ||
             this.obstacles[this.lastObstacleGenerated].position.y <
             this.nextObstaclePositionY) {

@@ -139,18 +139,29 @@ var toTorusMatrixTransformation = function (position2D, radius, tubeRadius) {
 
 
 
-var toCylinderMatrixTransformation = function (position2D, tubeRadius, tubeLength) {
+var toCylinderMatrixTransformation = function (position2D, tubeRadius, tubeLength, width) {
     "use strict";
-    var position3D, angle, transformationMatrix, matrixHelper;
-    angle = position2D.x * 2 * Math.PI;
-    position3D = new THREE.Vector3(tubeRadius * Math.cos(angle),
-                         -1, tubeRadius * Math.sin(angle));
+    var position3D, angle, transformationMatrix, matrixHelper, meshAngle;
+    meshAngle = width * 2 * Math.PI;
+    angle = (position2D.x * 2 * Math.PI);
+    position3D = new THREE.Vector3(tubeRadius * Math.sin(angle),
+                         -1, tubeRadius * Math.cos(angle));
     transformationMatrix = new THREE.Matrix4();
     matrixHelper = new THREE.Matrix4();
     transformationMatrix.makeRotationX(-Math.PI / 2);
-    matrixHelper.makeRotationZ(angle);
+    matrixHelper.makeRotationZ(angle - meshAngle / 2);
     transformationMatrix.multiply(matrixHelper);
     matrixHelper.makeTranslation(0, 0, -position2D.y);
     transformationMatrix.multiply(matrixHelper);
     return transformationMatrix;
+};
+
+//Utility to clean a three.js scene
+
+var cleanThreeScene = function (scene) {
+    "use strict";
+    var i, object;
+    for (i = 0; i < scene.children.length; i++) {
+        scene.remove(scene.children[i]);
+    }
 };
