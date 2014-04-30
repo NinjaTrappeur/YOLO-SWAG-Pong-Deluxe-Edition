@@ -24,10 +24,6 @@ var GameEngine = function (gameState) {
         this.lastObstacleGenerated = null;
         this.batInvincibleTime = -1;
         this.keyboard = new THREEx.KeyboardState();
-        this.rayCaster = new THREE.Raycaster(new THREE.Vector3(0, 0, 0),
-                                             new THREE.Vector3(0, 0, 0),
-                                             0,
-                                             0.1);
         this.initGame();
     } else { throw ("The game engine needs a GameState in parameter."); }
 };
@@ -36,16 +32,16 @@ GameEngine.prototype.initGame = function () {
     "use strict";
     this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.02));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
-    console.log(this.bat);
+    this.gameState.dummy = this.bat;
 };
 
 GameEngine.prototype.computeKeyboard = function () {
     "use strict";
     if (this.keyboard.pressed("right")) {
-        this.moveMesh(this.bat, new THREE.Vector3(-this.batStep, 0, 0));
+        this.moveMesh(this.bat, new THREE.Vector3(this.batStep, 0, 0));
         this.gameState.bat.position = this.bat[1].position;
     } else if (this.keyboard.pressed("left")) {
-        this.moveMesh(this.bat, new THREE.Vector3(this.batStep, 0, 0));
+        this.moveMesh(this.bat, new THREE.Vector3(-this.batStep, 0, 0));
         this.gameState.bat.position = this.bat[1].position;
     } else if (this.keyboard.pressed("space") && this.gameState.gameState === "waiting") {
         this.gameState.gameState = "starting";
@@ -83,29 +79,25 @@ GameEngine.prototype.computeBatCollisions = function () {
     objects = [];
     for (obstacleGroupId in this.obstacles) {
         obstacleGroup = this.obstacles[obstacleGroupId];
-        posObstacle = obstacleGroup[0].position.y;
+        posObstacle = obstacleGroup.position.y;
         posBat = this.bat[0].position.y;
         //On regarde si le groupe d'obstacles est susceptible d'entrer en collision avec la raquette.
         //On utilise la position en y du groupe (qui est le mm pour tous les membres du groupe). 
         
-        obstacleWidth = this.gameState.obstacles[obstacleGroupId].size.width / 4;
-        batWidth = this.gameState.obstacles[obstacleGroupId].size.width / 4;
-        if ((posObstacle - this.gameState.obstacles[obstacleGroupId].size.length / 2) < (posBat + this.gameState.bat.size.length / 2) &&
-                posObstacle > (posBat - this.gameState.bat.size.length / 2)) {
+        obstacleWidth = this.gameState.obstacles[obstacleGroupId].size.width / 2;
+        batWidth = this.gameState.obstacles[obstacleGroupId].size.width / 2;
+        if ((posObstacle - this.gameState.obstacles[obstacleGroupId].size.length / 2) < (posBat + this.gameState.bat.size.length / 2) 
+            && posObstacle > (posBat - this.gameState.bat.size.length / 2)) {
             //On vérifie s'il y a collision ou pas à l'aide des coordonées en x.
-            for (i = 0; i < obstacleGroup.length; ++i) {
-                posObstacle = obstacleGroup[i].position.x;
+                posObstacle = obstacleGroup.position.x;
                 for (j = 0; j < this.bat.length; j++) {
                     posBat = this.bat[j].position.x;
-                    console.log(posBat);
-                    if (Math.abs(posObstacle - posBat) < (obstacleWidth + batWidth)) {
-                        console.log("collision");
+                    if (Math.abs(posBat - posObstacle) < (obstacleWidth + batWidth)) {
+                        console.log("Collision");
                     }
-                    
                 }
             }
         }
-    }
 };
 
 
@@ -155,7 +147,6 @@ GameEngine.prototype.createMesh = function (position, size) {
         mesh.position.z = 0;
         meshTab.push(mesh);
     }
-    console.log(meshTab);
     return meshTab;
 };
 
@@ -184,7 +175,7 @@ GameEngine.prototype.moveMesh = function (meshes, velocityVector) {
 
 GameEngine.prototype.generateObstacle = function (maxWidth, maxLength, yPos) {
     "use strict";
-    var size, width, length, position, meshes, arenaWidth, rand;
+    var size, width, length, position, mesh, arenaWidth, rand;
     position = new THREE.Vector3();
     position.y = yPos;
     arenaWidth = this.gameState.arena.size.width;
@@ -194,9 +185,9 @@ GameEngine.prototype.generateObstacle = function (maxWidth, maxLength, yPos) {
     
     width = Math.random() * maxWidth + 0.1;
     length = this.obstacleLength;
-    size = new Size(width, length);
-    meshes = this.createMesh(position, size);
-    return [meshes, new Size(width, length)];
+    mesh = new THREE.Mesh(new THREE.CubeGeometry(width, length, length), new THREE.MeshBasicMaterial());
+    mesh.position = position;
+    return [mesh, new Size(width, length)];
 };
 
 GameEngine.prototype.createObstacle = function () {
@@ -211,7 +202,7 @@ GameEngine.prototype.createObstacle = function () {
                               (arenaSize.length / 2) +  arenaSize.length / 6);
     this.obstacles[this.lastObstacleGenerated + 1] = result[0];
     this.gameState.obstacles[this.lastObstacleGenerated + 1] =
-        new Obstacle(result[0][1].position, result[1]);
+        new Obstacle(result[0].position, result[1]);
     this.gameState.popId = this.lastObstacleGenerated + 1;
     this.lastObstacleGenerated += 1;
     this.nextObstaclePositionY = (arenaSize.length / 2) -
@@ -222,9 +213,9 @@ GameEngine.prototype.moveObstacles = function () {
     "use strict";
     var obstacleGroup;
     for (obstacleGroup in this.obstacles) {
-        this.moveMesh(this.obstacles[obstacleGroup], this.obstaclesVelocity);
+        this.obstacles[obstacleGroup].add(this.obstaclesVelocity);
         this.gameState.obstacles[obstacleGroup].position.add(this.obstaclesVelocity);
-        if (this.obstacles[obstacleGroup][1].position.y <
+        if (this.obstacles[obstacleGroup].position.y <
                 -(7 * (this.gameState.arena.size.length / 12.0))) {
             delete this.obstacles[obstacleGroup];
             delete this.gameState.obstacles[obstacleGroup];
@@ -237,7 +228,7 @@ GameEngine.prototype.computeObstacles = function () {
     "use strict";
     var mesh;
     if (this.lastObstacleGenerated === null ||
-            this.obstacles[this.lastObstacleGenerated][1].position.y <
+            this.obstacles[this.lastObstacleGenerated].position.y <
             this.nextObstaclePositionY) {
         this.createObstacle();
     }

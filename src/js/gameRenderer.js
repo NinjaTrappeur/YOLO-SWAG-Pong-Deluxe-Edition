@@ -94,6 +94,9 @@ SimpleRenderer.prototype.init = function () {
     //Creating arena
     geometry = new THREE.PlaneGeometry(this.gameState.arena.size.width,
                                        this.gameState.arena.size.length);
+    for (i = 0; i < this.gameState.dummy.length; i++) {
+        this.scene.add(this.gameState.dummy[i]);
+    }
     material = new THREE.MeshNormalMaterial();
     mesh = new THREE.Mesh(geometry, material);
     this.scene.add(mesh);
