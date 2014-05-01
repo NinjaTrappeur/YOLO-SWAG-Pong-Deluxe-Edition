@@ -3,7 +3,9 @@
 /*jslint plusplus: true */
 
 
-var renderer, gameEngine, gui, threeRenderer;
+var renderer, gameEngine, gui, threeRenderer, treeGeometry, composer;
+itemsLoaded = 0;
+treeGeometry = null;
 
 function animate() {
     "use strict";
@@ -24,6 +26,7 @@ function createDatGui() {
         renderer.setActiveRenderer(value);
         createDatGui();
     }).name("Renderer");
+    rendererFolder.add(renderer.activeRenderer, "postprocessing").onChange(function () {renderer.activeRenderer.setPostProcessing(); }).name("Post processing");
     cameraFolder = gui.addFolder("Camera");
     cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X");
     cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y");
@@ -50,10 +53,12 @@ function init() {
     threeRenderer.setSize(window.innerWidth, window.innerHeight);
     threeRenderer.autoClear = true;
     document.body.appendChild(threeRenderer.domElement);
+    composer = new THREE.EffectComposer(threeRenderer);
     
-    simpleRenderer = new SimpleRenderer(gameState, threeRenderer);
-    cylinderRenderer = new CylinderRenderer(gameState, threeRenderer);
     renderer = new Renderer();
+    
+    simpleRenderer = new SimpleRenderer(gameState, threeRenderer, composer);
+    cylinderRenderer = new CylinderRenderer(gameState, threeRenderer, composer);
     renderer.renderers.push(simpleRenderer);
     renderer.renderers.push(cylinderRenderer);
     renderer.setActiveRenderer("CylinderRenderer");
@@ -68,11 +73,27 @@ function init() {
     gameState.gameState = "waiting";
 }
 
+function loader(iteration) {
+    "use strict";
+    var jsLoader;
+    if(iteration === 0) {
+    jsLoader = new THREE.JSONLoader();
+    jsLoader.load("src/lib/tree_geometry.js",
+        function (geometry) {
+            treeGeometry = geometry;
+            loader(1);
+        }
+        );
+    } else if (iteration === 1) {
+        init();
+        animate();
+    }
+}
+
 
 //Main loop
 function mainLoop() {
     "use strict";
-    init();
-    animate();
+    loader(0);
 }
 

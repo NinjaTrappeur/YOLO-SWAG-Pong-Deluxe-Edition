@@ -44,6 +44,10 @@ GameEngine.prototype.computeKeyboard = function () {
     } else if (this.keyboard.pressed("space") && this.gameState.gameState === "waiting") {
         this.initGame();
         this.gameState.gameState = "starting";
+    } else if (this.keyboard.pressed("numpad 0") || this.keyboard.pressed("0")) {
+        this.gameState.cameraPosition = "arena";
+    } else if (this.keyboard.pressed("numpad 1") || this.keyboard.pressed("1")) {
+        this.gameState.cameraPosition = "bat";   
     }
 };
 

@@ -42,7 +42,7 @@ Renderer.prototype.setActiveRenderer = function (name) {
  * init method.
  */
 
-var AbstractRenderer = function (gameState, renderer) {
+var AbstractRenderer = function (gameState, renderer, composer) {
     "use strict";
     
     if (gameState instanceof GameState) {
@@ -51,18 +51,33 @@ var AbstractRenderer = function (gameState, renderer) {
         throw ("Parameter needs to be a GameState object.");
     }
     this.renderer = renderer;
+    this.composer = composer;
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 100);
     this.winResize   = new THREEx.WindowResize(this.renderer, this.camera);
     this.scene = new THREE.Scene();
     this.scene.add(this.camera);
+    this.postprocessing = false;
     this.bats = [];
     this.balls = [];
     this.name = "AbstractRenderer";
 };
 
+AbstractRenderer.prototype.initComposer = function () {
+    "use strict";
+    this.composer.reset();
+    this.composer.addPass(new THREE.RenderPass(this.scene, this.camera));
+    this.dotEffect = new THREE.ShaderPass(THREE.DotScreenShader);
+    this.dotEffect.uniforms.scale.value = 4;
+    this.dotEffect.enabled = this.postprocessing;
+    this.composer.addPass(this.dotEffect);
+    var copy = new THREE.ShaderPass(THREE.CopyShader);
+    copy.renderToScreen = true;
+    this.composer.addPass(copy);
+};
+
 AbstractRenderer.prototype.render = function () {
     "use strict";
-    this.renderer.render(this.scene, this.camera);
+    this.composer.render();
 };
 
 AbstractRenderer.prototype.init = function () {
@@ -74,9 +89,9 @@ AbstractRenderer.prototype.init = function () {
 // class SimpleRenderer: extends AbstractRenderer
 //========================================
 
-var SimpleRenderer = function (gameState, renderer) {
+var SimpleRenderer = function (gameState, renderer, composer) {
     "use strict";
-    AbstractRenderer.call(this, gameState, renderer);
+    AbstractRenderer.call(this, gameState, renderer, composer);
     this.name = "SimpleRenderer";
 };
 
@@ -180,9 +195,10 @@ SimpleRenderer.prototype.render = function () {
 
 //Class CylinderRenderer: extends AbstractRenderer
 //========================================================
-var CylinderRenderer = function (gameState, renderer) {
+var CylinderRenderer = function (gameState, renderer, composer) {
     "use strict";
-    AbstractRenderer.call(this, gameState, renderer);
+    var loader;
+    AbstractRenderer.call(this, gameState, renderer, composer);
     this.tubeLength = 4;
     this.tubeRadius = 1;
     this.meshHeigth = 0.1;
@@ -195,14 +211,20 @@ extendClass(CylinderRenderer, AbstractRenderer);
 
 CylinderRenderer.prototype.init = function () {
     "use strict";
-    var material;
+    var material, light;
     cleanThreeScene(this.scene);
     this.camera.fov = 10;
     this.camera.updateProjectionMatrix();
     this.camera.rotateZ(Math.PI);
     this.angle = 0;
-    this.generateEnvironment();
+    this.generateEnvironment(128);
     this.addAllObstacles();
+    this.initComposer();
+};
+
+CylinderRenderer.prototype.setPostProcessing = function () {
+    "use strict";
+    this.dotEffect.enabled = this.postprocessing;
 };
 
 CylinderRenderer.prototype.reset = function () {
@@ -215,9 +237,9 @@ CylinderRenderer.prototype.reset = function () {
     
 };
 
-CylinderRenderer.prototype.generateEnvironment = function () {
+CylinderRenderer.prototype.generateEnvironment = function (length) {
     "use strict";
-    var material;
+    var material, mesh, zpos;
     this.tubeTexture = THREE.ImageUtils.loadTexture("img/grid.jpg");
     this.tubeTexture.wrapS = THREE.RepeatWrapping;
     this.tubeTexture.wrapT = THREE.RepeatWrapping;
@@ -235,18 +257,57 @@ CylinderRenderer.prototype.generateEnvironment = function () {
     this.scene.add(this.cylinderMesh);
     this.batMesh = this.createBat();
     this.scene.add(this.batMesh);
+    material = new THREE.MeshBasicMaterial({color: 0x315e91});
+    //Moving door
     this.floorMesh1 = new THREE.Mesh(new THREE.PlaneGeometry(2, 4),
-                                    new THREE.MeshNormalMaterial());
+                                    material);
     this.floorMesh2 = new THREE.Mesh(new THREE.PlaneGeometry(2, 4),
-                                     new THREE.MeshNormalMaterial());
+                                     material);
     this.floorMesh1.position.x = 1;
     this.floorMesh2.position.x = -1;
-    this.floorMesh1.position.y = 2.1;
-    this.floorMesh2.position.y = 2.1;
+    this.floorMesh1.position.y = 2.2;
+    this.floorMesh2.position.y = 2.2;
     this.floorMesh1.rotateX(-Math.PI / 2);
     this.floorMesh2.rotateX(-Math.PI / 2);
     this.scene.add(this.floorMesh1);
     this.scene.add(this.floorMesh2);
+    this.generateStaticEnvironment(length);
+
+};
+
+CylinderRenderer.prototype.generateStaticEnvironment = function (length) {
+    "use strict";
+    var material, mesh, zpos, xpos;
+    material = new THREE.MeshBasicMaterial({color: 0x2780e5});
+    zpos = (((length - 2) / 2) + 2);
+    mesh = new THREE.Mesh(new THREE.PlaneGeometry(length, length - 2),
+                                 material);
+    mesh.rotateX(-Math.PI / 2);
+    mesh.position.y = 2.2;
+    mesh.position.z = zpos;
+    this.scene.add(mesh);
+    mesh = mesh.clone();
+    mesh.position.z = -zpos;
+    this.scene.add(mesh);
+    
+    xpos = ((length / 2) - 2) / 2 + 2;
+    mesh = new THREE.Mesh(new THREE.PlaneGeometry(length / 2 - 2, 4),
+                          material);
+    mesh.rotateX(-Math.PI / 2);
+    mesh.position.y = 2.2;
+    mesh.position.x = xpos;
+    this.scene.add(mesh);
+    mesh = mesh.clone();
+    mesh.position.x = -xpos;
+    this.scene.add(mesh);
+    
+    material = [new THREE.MeshBasicMaterial({wireframe: true}),
+                new THREE.MeshBasicMaterial({color: 0x315e91})];
+    
+    mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
+    mesh.position.set(2, 2.3, 2);
+    this.scene.add(mesh);
+    
 };
 
 CylinderRenderer.prototype.render = function () {
@@ -263,7 +324,7 @@ CylinderRenderer.prototype.render = function () {
         this.transitionToGameOut();
     }
     this.updateMeshesPosition();
-    this.renderer.render(this.scene, this.camera);
+    this.composer.render();
 };
 
 //Camera and animation stuff
@@ -274,7 +335,7 @@ CylinderRenderer.prototype.transitionToGameIn = function () {
     var tween, timeLineIn;
     timeLineIn = new TimelineLite({onComplete: function () {
         this.gameState.gameState = "running";
-        this.scene.fog = new THREE.Fog(0x000000, 0, 1);
+        this.scene.fog = new THREE.Fog(0x000000, 1, 2);
     },
                                    onCompleteScope: this});
     //Camera movement
@@ -301,7 +362,7 @@ CylinderRenderer.prototype.transitionToGameIn = function () {
 CylinderRenderer.prototype.transitionToGameOut = function () {
     "use strict";
     var tween, timeLineOut, ray;
-    ray = 20;
+    ray = 50;
     timeLineOut = new TimelineLite({onComplete: function () {
         this.camera.updateProjectionMatrix();
         this.gameState.gameState = "waiting";
@@ -316,7 +377,7 @@ CylinderRenderer.prototype.transitionToGameOut = function () {
     tween = TweenMax.to(this.camera, 1, {fov : 10, onUpdate: function () {this.camera.updateProjectionMatrix(); }, onUpdateScope: this});
     timeLineOut.add(tween, 0);
     //Camera movement
-    tween = TweenMax.to(this.camera.position, 1, {x : ray * Math.cos(this.angle), y : 10, z : ray * Math.sin(this.angle),
+    tween = TweenMax.to(this.camera.position, 1, {x : ray * Math.cos(this.angle), y : 20, z : ray * Math.sin(this.angle),
                                          onUpdate : function () { this.camera.lookAt(new THREE.Vector3(0, 2, 0)); },
                                          onUpdateScope: this});
     timeLineOut.add(tween, 1);
@@ -331,26 +392,49 @@ CylinderRenderer.prototype.transitionToGameOut = function () {
     timeLineOut.play();
 };
 
+//Camera stuff
+//===============================
 CylinderRenderer.prototype.handleCamera = function () {
     "use strict";
     var ray;
     if (this.gameState.gameState === "waiting") {
-        ray = 20;
+        ray = 50;
         if (this.angle < 0) {
             this.angle = 2 * Math.PI;
         }
         this.camera.position.x = ray * Math.cos(this.angle);
         this.camera.position.z = ray * Math.sin(this.angle);
-        this.camera.position.y = 10;
+        this.camera.position.y = 20;
         this.camera.lookAt(new THREE.Vector3(0, 2, 0));
         this.angle -= 0.005;
     }
     if (this.gameState.gameState === "running") {
-        this.camera.position.y = 1.1;
-        this.camera.position.x = 0;
-        this.camera.position.z = 0;
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        if (this.camera.fov !== 200) {
+            this.camera.fov = 200;
+            this.camera.updateProjectionMatrix();
+        }
+        if (this.gameState.cameraPosition === "arena") {
+            this.camera.position.y = 1.1;
+            this.camera.position.x = 0;
+            this.camera.position.z = 0;
+            this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        } else if (this.gameState.cameraPosition === "bat") {
+            this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+            this.moveCameraAroundCylinder(this.gameState.bat.position);
+        }
     }
+};
+
+CylinderRenderer.prototype.moveCameraAroundCylinder = function (position) {
+    "use strict";
+    var angle, cameraPos, batAngle;
+    batAngle = this.gameState.bat.size.width * 2 * Math.PI;
+    cameraPos = this.camera.position;
+    angle = 2 * Math.PI * this.gameState.bat.position.x + batAngle / 2 + Math.PI / 4;
+    cameraPos.y = this.batMesh.position.y - 0.1;
+    cameraPos.x = (this.tubeRadius - 0.5) * Math.sin(angle);
+    cameraPos.z = (this.tubeRadius - 0.5) * Math.cos(angle);
+    this.camera.lookAt(new THREE.Vector3(cameraPos.x, cameraPos.y - 0.1, cameraPos.z));
 };
 
 //Meshes stuff

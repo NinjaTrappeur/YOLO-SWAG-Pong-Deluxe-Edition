@@ -130,4 +130,5 @@ var GameState = function () {
     this.vanishId = null;
     //Obstacle popped
     this.popId = null;
+    this.cameraPosition = "arena";
 };
