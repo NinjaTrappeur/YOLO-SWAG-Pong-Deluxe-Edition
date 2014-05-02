@@ -308,8 +308,12 @@ CylinderRenderer.prototype.generateStaticEnvironment = function (length) {
     mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
     mesh.position.set(2, 2.3, 2);
     this.scene.add(mesh);
-    
 };
+
+//CylinderRenderer.prototype.createTrees = function (nbTrees) {
+//    "use strict";
+//    
+//};
 
 CylinderRenderer.prototype.render = function () {
     "use strict";
@@ -317,6 +321,7 @@ CylinderRenderer.prototype.render = function () {
     if (this.gameState.gameState === "running") {
         this.handleTextureDefilement();
         this.handleObstacles();
+        this.updateMeshesPosition();
     } else if (this.gameState.gameState === "starting") {
         this.gameState.gameState = "waiting start";
         this.transitionToGameIn();
@@ -324,7 +329,6 @@ CylinderRenderer.prototype.render = function () {
         this.gameState.gameState = "waiting end";
         this.transitionToGameOut();
     }
-    this.updateMeshesPosition();
     if (this.postprocessing) {
         this.composer.render();
     } else {

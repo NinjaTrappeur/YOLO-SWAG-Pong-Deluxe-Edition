@@ -13,7 +13,7 @@ var GameEngine = function (gameState) {
     "use strict";
     if (gameState instanceof GameState) {
         this.gameState = gameState;
-        this.batStep = 0.01;
+        this.batStep = 0.015;
         this.keyboard = new THREEx.KeyboardState();
         this.initGame();
     } else { throw ("The game engine needs a GameState in parameter."); }
@@ -212,19 +212,19 @@ GameEngine.prototype.createObstacle = function () {
                     Math.random() * (arenaSize.length / 6);
         break;
     case 2:
-        result = this.generateObstacle(2 * (arenaSize.width / 3),
+        result = this.generateObstacle(arenaSize.width / 2,
                               (arenaSize.length / 2) +  arenaSize.length / 6);
         this.nextObstaclePositionY = (arenaSize.length / 2) -
                     Math.random() * (arenaSize.length / 7);
         break;
     case 3:
-        result = this.generateObstacle(3 * (arenaSize.width / 4),
+        result = this.generateObstacle(arenaSize.width / 2,
                               (arenaSize.length / 2) +  arenaSize.length / 6);
         this.nextObstaclePositionY = (arenaSize.length / 2) -
                     Math.random() * (arenaSize.length / 7.5);
         break;
     case 4:
-        result = this.generateObstacle(3 * (arenaSize.width / 4),
+        result = this.generateObstacle(2 * (arenaSize.width / 3),
                               (arenaSize.length / 2) +  arenaSize.length / 6);
         this.nextObstaclePositionY = (arenaSize.length / 2) -
                     Math.random() * (arenaSize.length / 8);
