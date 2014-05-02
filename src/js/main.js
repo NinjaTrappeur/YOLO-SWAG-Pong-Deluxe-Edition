@@ -3,7 +3,9 @@
 /*jslint plusplus: true */
 
 
-var renderer, gameEngine, gui, threeRenderer, treeGeometry, composer, godMode, parametersFolder;
+var renderer, gameEngine, gui, threeRenderer, treeGeometry, composer, godMode, parametersFolder, helpDisplayed;
+
+helpDisplayed = false;
 
 var GodMode = function () {
     "use strict";
@@ -61,6 +63,7 @@ function init() {
     }
     threeRenderer.setSize(window.innerWidth, window.innerHeight);
     threeRenderer.autoClear = true;
+    THREEx.Screenshot.bindKey(threeRenderer);
     document.body.appendChild(threeRenderer.domElement);
     composer = new THREE.EffectComposer(threeRenderer);
     

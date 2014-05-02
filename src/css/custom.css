@@ -46,6 +46,29 @@ body{
     padding-bottom: 0px;
 }
 
+.helpMessage {
+    background-color: black;
+    font-size: 50px;
+    color:white;
+    text-align:center;
+    text-decoration:bold;
+    bottom:0px;
+    position:fixed;
+    text-shadow: 0 0 2px #000;
+    border-top-style: solid;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-color: white;
+    font-family: "Square";
+    width: 90%;
+    bottom: 0px;
+    padding: 5px;
+    padding-bottom: 0px;
+    visibility: hidden;
+}
+
 .bestTimeMessage {
     background-color: black;
     font-size: 50px;

@@ -30,6 +30,8 @@ GameEngine.prototype.initGame = function () {
     this.obstacleLength = 0.05;
     this.obstaclesVelocity = new THREE.Vector3(0, -0.005, 0);
     this.lastObstacleGenerated = null;
+    this.helpDisplayed = false;
+    this.helpTimeOut = -1;
     this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.02));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
     storage = localStorage.getItem('bestTime');
@@ -53,11 +55,23 @@ GameEngine.prototype.computeKeyboard = function () {
     } else if (this.keyboard.pressed("space") && this.gameState.gameState === "waiting") {
         this.initGame();
         this.gameState.gameState = "starting";
+    } else if(this.keyboard.pressed("h") && this.helpTimeOut < 0) {
+        this.helpTimeOut = 10;
+        if(!this.helpDisplayed) {
+            this.helpDisplayed = true;
+            document.getElementById("helpMessage").style.visibility = "visible";
+        }
+        else {
+            this.helpDisplayed = false;
+            document.getElementById("helpMessage").style.visibility = "hidden";
+        }
+        
     } else if (this.keyboard.pressed("numpad 0") || this.keyboard.pressed("0")) {
         this.gameState.cameraPosition = "arena";
     } else if (this.keyboard.pressed("numpad 1") || this.keyboard.pressed("1")) {
         this.gameState.cameraPosition = "bat";
     }
+    if(this.helpTimeOut >= 0) { this.helpTimeOut--;}
 };
 
 GameEngine.prototype.compute = function () {
