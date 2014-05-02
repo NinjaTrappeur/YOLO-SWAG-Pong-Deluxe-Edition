@@ -3,7 +3,15 @@
 /*jslint plusplus: true */
 
 
-var renderer, gameEngine, gui, threeRenderer, treeGeometry, composer;
+var renderer, gameEngine, gui, threeRenderer, treeGeometry, composer, godMode, parametersFolder;
+
+var GodMode = function () {
+    "use strict";
+    this.enabled = false;   
+};
+
+godMode = new GodMode()
+
 itemsLoaded = 0;
 treeGeometry = null;
 function animate() {
@@ -21,11 +29,13 @@ function createDatGui() {
     }
     gui = new dat.GUI();
     rendererFolder = gui.addFolder("Renderer");
+    parametersFolder = gui.addFolder("Parameters");
     rendererFolder.add(renderer, "activeRendererString", ["SimpleRenderer", "CylinderRenderer"]).onChange(function (value) {
         renderer.setActiveRenderer(value);
         createDatGui();
     }).name("Renderer");
-    rendererFolder.add(renderer.activeRenderer, "postprocessing").onChange(function () {renderer.activeRenderer.setPostProcessing(); }).name("Post processing");
+    parametersFolder.add(renderer.activeRenderer, "postprocessing").onChange(function () {renderer.activeRenderer.setPostProcessing(); }).name("Post processing");
+    parametersFolder.add(godMode, "enabled").name("God mode");
     cameraFolder = gui.addFolder("Camera");
     cameraFolder.add(renderer.activeRenderer.camera.position, "x").name("Position X");
     cameraFolder.add(renderer.activeRenderer.camera.position, "y").name("Position Y");
@@ -77,7 +87,7 @@ function loader(iteration) {
     var jsLoader;
     if(iteration === 0) {
     jsLoader = new THREE.JSONLoader();
-    jsLoader.load("src/lib/tree_geometry.js",
+    jsLoader.load("src/medias/models/tree_geometry.js",
         function (geometry) {
             treeGeometry = geometry;
             loader(1);

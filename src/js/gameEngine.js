@@ -75,12 +75,14 @@ GameEngine.prototype.compute = function () {
     }
     if (this.gameState.gameState === "running") {
         this.computeObstacles();
-        this.computeCollisions();
+        if (!godMode.enabled) {
+            this.computeCollisions();
+        }
         this.computeTime();
     }
     if (this.gameState.gameState === "ending") {
         time = this.gameState.gameTime;
-        if(time > JSON.parse(localStorage.getItem('bestTime'))) {
+        if(time > JSON.parse(localStorage.getItem('bestTime')) && !godMode.enabled) {
             localStorage.setItem('bestTime', JSON.stringify(time));
             document.getElementById("bestTimeMessage").textContent = "Best time: " + Math.floor(time / 1000) + ":" + (Math.floor(time/10) % 100);
         }

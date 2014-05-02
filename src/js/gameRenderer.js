@@ -241,7 +241,7 @@ CylinderRenderer.prototype.reset = function () {
 CylinderRenderer.prototype.generateEnvironment = function (length) {
     "use strict";
     var material, mesh, zpos;
-    this.tubeTexture = THREE.ImageUtils.loadTexture("img/grid.jpg");
+    this.tubeTexture = THREE.ImageUtils.loadTexture("src/medias/images/grid.jpg");
     this.tubeTexture.wrapS = THREE.RepeatWrapping;
     this.tubeTexture.wrapT = THREE.RepeatWrapping;
     this.tubeTexture.repeat.set(40, 40);
