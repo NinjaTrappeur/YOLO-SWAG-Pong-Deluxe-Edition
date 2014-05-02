@@ -53,7 +53,7 @@ var AbstractRenderer = function (gameState, renderer, composer) {
     }
     this.renderer = renderer;
     this.composer = composer;
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 100);
+    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 500);
     this.winResize   = new THREEx.WindowResize(this.renderer, this.camera);
     this.scene = new THREE.Scene();
     this.scene.add(this.camera);
@@ -301,7 +301,7 @@ CylinderRenderer.prototype.generateStaticEnvironment = function (length) {
     mesh = mesh.clone();
     mesh.position.x = -xpos;
     this.scene.add(mesh);
-    this.createTrees(8, length);
+    this.createTrees(256, length);
 };
 
 CylinderRenderer.prototype.createTrees = function (nbTrees, length) {
@@ -310,7 +310,7 @@ CylinderRenderer.prototype.createTrees = function (nbTrees, length) {
     zoneLength = length / 3;
     offset = zoneLength / 2;
     nbTreeZone = Math.ceil(nbTrees / 8);
-    this.createTreesZone(length, 32);
+    this.createTreesZone(length, nbTrees);
 };
 
 CylinderRenderer.prototype.createTreesZone = function (length, nbTrees) {
@@ -327,7 +327,7 @@ CylinderRenderer.prototype.createTreesZone = function (length, nbTrees) {
         } else {
             sign = 1;
         }
-        position.z = sign * (Math.random() * (length / 8) + offset);
+        position.z = sign * (Math.random() * (length / 4) + offset);
         position.y = 2.3;
         mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
         mesh.position = position;
@@ -341,7 +341,7 @@ CylinderRenderer.prototype.createTreesZone = function (length, nbTrees) {
         } else {
             sign = 1;
         }
-        position.x = sign * (Math.random() * (length / 8) + offset);
+        position.x = sign * (Math.random() * (length / 3.) + offset);
         position.y = 2.3;
         mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
         mesh.position = position;
@@ -423,7 +423,7 @@ CylinderRenderer.prototype.transitionToGameIn = function () {
 CylinderRenderer.prototype.transitionToGameOut = function () {
     "use strict";
     var tween, timeLineOut, ray;
-    ray = 50;
+    ray = 80;
     timeLineOut = new TimelineLite({onComplete: function () {
         this.camera.updateProjectionMatrix();
         this.gameState.gameState = "waiting";
@@ -459,7 +459,7 @@ CylinderRenderer.prototype.handleCamera = function () {
     "use strict";
     var ray;
     if (this.gameState.gameState === "waiting") {
-        ray = 50;
+        ray = 80;
         if (this.angle < 0) {
             this.angle = 2 * Math.PI;
         }
