@@ -301,19 +301,53 @@ CylinderRenderer.prototype.generateStaticEnvironment = function (length) {
     mesh = mesh.clone();
     mesh.position.x = -xpos;
     this.scene.add(mesh);
-    
-    material = [new THREE.MeshBasicMaterial({wireframe: true}),
-                new THREE.MeshBasicMaterial({color: 0x315e91})];
-    
-    mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
-    mesh.position.set(2, 2.3, 2);
-    this.scene.add(mesh);
+    this.createTrees(8, length);
 };
 
-//CylinderRenderer.prototype.createTrees = function (nbTrees) {
-//    "use strict";
-//    
-//};
+CylinderRenderer.prototype.createTrees = function (nbTrees, length) {
+    "use strict";
+    var nbTreeZone, i, zoneLength, offset;
+    zoneLength = length / 3;
+    offset = zoneLength / 2;
+    nbTreeZone = Math.ceil(nbTrees / 8);
+    this.createTreesZone(length, 32);
+};
+
+CylinderRenderer.prototype.createTreesZone = function (length, nbTrees) {
+    "use strict";
+    var offset, i, position, material, mesh, sign;
+    offset = 2;
+    material = [new THREE.MeshBasicMaterial({wireframe: true}),
+                new THREE.MeshBasicMaterial({color: 0x315e91})];
+    for (i = 0; i < Math.ceil(nbTrees / 2); i++) {
+        position = new THREE.Vector3();
+        position.x = Math.random() * (length / 3) - (length / 3) / 2;
+        if (Math.random() > 0.5) {
+            sign = -1;
+        } else {
+            sign = 1;
+        }
+        position.z = sign * (Math.random() * (length / 8) + offset);
+        position.y = 2.3;
+        mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
+        mesh.position = position;
+        this.scene.add(mesh);
+    }
+    for (i = Math.ceil(nbTrees / 2); i < nbTrees; i++) {
+        position = new THREE.Vector3();
+        position.z = Math.random() * (length / 3) - (length / 3) / 2;
+        if (Math.random() > 0.5) {
+            sign = -1;
+        } else {
+            sign = 1;
+        }
+        position.x = sign * (Math.random() * (length / 8) + offset);
+        position.y = 2.3;
+        mesh = new THREE.SceneUtils.createMultiMaterialObject(treeGeometry, material);
+        mesh.position = position;
+        this.scene.add(mesh);
+    }
+};
 
 CylinderRenderer.prototype.render = function () {
     "use strict";
