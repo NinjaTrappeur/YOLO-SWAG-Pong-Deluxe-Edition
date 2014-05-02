@@ -3,6 +3,7 @@
     <head>
         <title>Super stunt pong! (deluxe edition)</title>
         <meta charset="utf-8">
+        <link href="src/css/custom.css" rel="stylesheet" type="text/css"/>
         <script src="src/lib/require.js"></script>
         <script src="src/lib/three.js"></script>
         <script src="src/lib/THREEx.FullScreen.js"></script>
@@ -23,10 +24,12 @@
         <script src="src/js/gameRenderer.js"></script>
         <script src="src/js/gameEngine.js"></script>
         <script src="src/js/main.js"></script>
-
         <script> window.onload=function(){mainLoop();};</script>
 
     </head>
-    <body style='margin: 0px; background-color: #000000; overflow: hidden;'>
+    <body>
+        <div class="levelMessage" id="levelMessage"></div>
+        <div class="timeMessage" id="timeMessage"></div>
+        <div class="bestTimeMessage" id="bestTimeMessage"></div>
     </body>
 </html>

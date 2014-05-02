@@ -1,0 +1,66 @@
+@font-face { 
+  font-family: 'Square'; 
+  src: url('/src/medias/Square.ttf'); 
+}
+.levelMessage {
+    background-color: black;
+    font-size: 50px;
+    color:white;
+    text-align:center;
+    text-decoration:bold;
+    top:0px;
+    position:fixed;
+    text-shadow: 0 0 2px #000;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-bottom-right-radius: 5px;
+    border-color: white;
+    font-family: "Square";
+    left: -100px;
+    padding: 5px;
+}
+
+body{
+    margin: 0px;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+.timeMessage {
+    background-color: black;
+    font-size: 50px;
+    color:white;
+    text-align:left;
+    text-decoration:bold;
+    bottom:0px;
+    position:fixed;
+    text-shadow: 0 0 2px #000;
+    border-left-style: solid;
+    border-top-style: solid;
+    border-top-left-radius: 5px;
+    border-color: white;
+    font-family: "Square";
+    width: 150px;
+    right: -200px;
+    padding: 5px;
+    padding-bottom: 0px;
+}
+
+.bestTimeMessage {
+    background-color: black;
+    font-size: 50px;
+    color:white;
+    text-align:center;
+    text-decoration:bold;
+    top:0px;
+    position:fixed;
+    text-shadow: 0 0 2px #000;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-bottom-right-radius: 5px;
+    border-color: white;
+    font-family: "Square";
+    left: 0px;
+    padding: 5px;
+    padding-bottom: 0px;
+}

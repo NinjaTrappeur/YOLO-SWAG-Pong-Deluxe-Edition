@@ -6,7 +6,6 @@
 var renderer, gameEngine, gui, threeRenderer, treeGeometry, composer;
 itemsLoaded = 0;
 treeGeometry = null;
-
 function animate() {
     "use strict";
     renderer.activeRenderer.render();

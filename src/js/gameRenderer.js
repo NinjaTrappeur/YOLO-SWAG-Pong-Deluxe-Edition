@@ -405,6 +405,11 @@ CylinderRenderer.prototype.transitionToGameIn = function () {
                                          onUpdateScope: this});
     timeLineIn.add(tween, 0);
     
+    //Best score out
+    
+    tween = new TweenMax.to(document.getElementById("bestTimeMessage"), 0.5, {css:{left: -500 }});
+    timeLineIn.add(tween, 0);
+    
     //Floor opening
     tween = TweenMax.to(this.floorMesh1.position, 1, {x : 2});
     timeLineIn.add(tween, 0);
@@ -426,6 +431,7 @@ CylinderRenderer.prototype.transitionToGameOut = function () {
     ray = 80;
     timeLineOut = new TimelineLite({onComplete: function () {
         this.camera.updateProjectionMatrix();
+        new TweenMax.to(document.getElementById("bestTimeMessage"), 0.5, {css:{left: 0 }});
         this.gameState.gameState = "waiting";
         this.scene.fog = new THREE.Fog(0x000000, 0, 1);
         this.reset();
@@ -449,6 +455,10 @@ CylinderRenderer.prototype.transitionToGameOut = function () {
     tween = TweenMax.to(this.floorMesh2.position, 1, {x : -1});
     timeLineOut.add(tween, 1);
     
+    tween = new TweenMax.to(document.getElementById("levelMessage"), 0.5, {css:{left: -200 }});
+    timeLineOut.add(tween, 1.5);
+    tween = new TweenMax.to(document.getElementById("timeMessage"), 0.5, {css:{right: -200 }});
+    timeLineOut.add(tween, 1.5);
 
     timeLineOut.play();
 };

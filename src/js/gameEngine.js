@@ -21,6 +21,7 @@ var GameEngine = function (gameState) {
 
 GameEngine.prototype.initGame = function () {
     "use strict";
+    var storage;
     this.obstacles = {};
     //yMin is the position where the obstacles disapear.
     this.ymin = -this.gameState.arena.length / 2 - 0.4;
@@ -31,6 +32,14 @@ GameEngine.prototype.initGame = function () {
     this.lastObstacleGenerated = null;
     this.gameState.bat = new Bat(new THREE.Vector3(0, -0.8, 0), new Size(0.1, 0.02));
     this.bat = this.createMesh(this.gameState.bat.position, this.gameState.bat.size);
+    storage = localStorage.getItem('bestTime');
+    if(storage === null) {
+        localStorage.setItem('bestTime', JSON.stringify(0));
+        storage = 0;
+    } else {
+        storage = JSON.parse(storage);   
+    }
+    document.getElementById("bestTimeMessage").textContent = "Best time: " + Math.floor(storage / 1000) + ":" + (Math.floor(storage/10) % 100);
 };
 
 GameEngine.prototype.computeKeyboard = function () {
@@ -53,16 +62,28 @@ GameEngine.prototype.computeKeyboard = function () {
 
 GameEngine.prototype.compute = function () {
     "use strict";
+    var time;
     this.computeKeyboard();
     if (this.gameState.gameState === "rendererReady") {
         this.gameState.startTime = new Date().getTime();
         this.gameState.level = 1;
+        document.getElementById("levelMessage").textContent = "Level 1";
+        new TweenMax.to(document.getElementById("levelMessage"), 0.5, {css:{left: 0}});
+        new TweenMax.to(document.getElementById("timeMessage"), 0.5, {css:{right: 0}});
+
         this.gameState.gameState = "running";
     }
     if (this.gameState.gameState === "running") {
         this.computeObstacles();
         this.computeCollisions();
         this.computeTime();
+    }
+    if (this.gameState.gameState === "ending") {
+        time = this.gameState.gameTime;
+        if(time > JSON.parse(localStorage.getItem('bestTime'))) {
+            localStorage.setItem('bestTime', JSON.stringify(time));
+            document.getElementById("bestTimeMessage").textContent = "Best time: " + Math.floor(time / 1000) + ":" + (Math.floor(time/10) % 100);
+        }
     }
 };
 
@@ -76,20 +97,23 @@ GameEngine.prototype.computeCollisions = function () {
 
 GameEngine.prototype.computeTime = function () {
     "use strict";
-    var currentTime = new Date().getTime();
-    this.gameState.gameTime = currentTime - this.gameState.startTime;
+    var currentTime, time;
+    currentTime = new Date().getTime();
+    time = currentTime - this.gameState.startTime;
+    this.gameState.gameTime = time;
+    document.getElementById("timeMessage").textContent = Math.floor(time / 1000) + ":" + (Math.floor(time/10) % 100);
     if (this.gameState.level === 1 && this.gameState.gameTime > 20000) {
         this.gameState.level = 2;
         this.obstaclesVelocity = new THREE.Vector3(0, -0.008, 0);
-        console.log("level 2");
+        document.getElementById("levelMessage").textContent = "Level 2";
     } else if (this.gameState.level === 2 && this.gameState.gameTime > 40000) {
         this.gameState.level = 3;
         this.obstaclesVelocity = new THREE.Vector3(0, -0.01, 0);
-        console.log("level 3");
+        document.getElementById("levelMessage").textContent = "Level 3";
     } else if (this.gameState.level === 3 && this.gameState.gameTime > 60000) {
         this.gameState.level = 4;
         this.obstaclesVelocity = new THREE.Vector3(0, -0.014, 0);
-        console.log("level 4");
+        document.getElementById("levelMessage").textContent = "Level 4";
     }
 };
 
