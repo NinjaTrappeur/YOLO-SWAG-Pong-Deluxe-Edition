@@ -5,9 +5,10 @@
  * mainly for testing.
  */
 
-/*global THREE, Position, Size, extendClass, number, string, GameState, Ball, Bat,
-Obstacle, THREEx, Detector, document, window, dat, toTorusCoordinates, console,
-toTorusMatrixTransformation, toTorusMeshSize, toCylinderMatrixTransformation, TimelineLite, TweenMax, cleanThreeScene*/
+/*global THREE, Size, extendClass, GameState, Ball, Bat,
+Obstacle, THREEx, Detector, document, window, dat, console,
+toCylinderMatrixTransformation, TimelineLite, TweenMax,
+cleanThreeScene, treeGeometry*/
 
 /*jslint plusplus: true */
 
@@ -184,7 +185,7 @@ SimpleRenderer.prototype.render = function () {
     "use strict";
     if (this.gameState.gameState === "starting") {
         this.reset();
-        this.gameState.gameState = "running";
+        this.gameState.gameState = "rendererReady";
     } else if (this.gameState.gameState === "ending") {
         this.gameState.gameState = "waiting";
     }
@@ -314,7 +315,7 @@ CylinderRenderer.prototype.render = function () {
     "use strict";
     this.handleCamera();
     if (this.gameState.gameState === "running") {
-        this.tubeTexture.offset.y -= 0.03;
+        this.handleTextureDefilement();
         this.handleObstacles();
     } else if (this.gameState.gameState === "starting") {
         this.gameState.gameState = "waiting start";
@@ -324,7 +325,29 @@ CylinderRenderer.prototype.render = function () {
         this.transitionToGameOut();
     }
     this.updateMeshesPosition();
-    this.composer.render();
+    if (this.postprocessing) {
+        this.composer.render();
+    } else {
+        this.renderer.render(this.scene, this.camera);
+    }
+};
+
+CylinderRenderer.prototype.handleTextureDefilement = function () {
+    "use strict";
+    switch (this.gameState.level) {
+    case 1:
+        this.tubeTexture.offset.y -= 0.05;
+        break;
+    case 2:
+        this.tubeTexture.offset.y -= 0.08;
+        break;
+    case 3:
+        this.tubeTexture.offset.y -= 0.1;
+        break;
+    case 4:
+        this.tubeTexture.offset.y -= 0.14;
+        break;
+    }
 };
 
 //Camera and animation stuff
@@ -334,7 +357,7 @@ CylinderRenderer.prototype.transitionToGameIn = function () {
     "use strict";
     var tween, timeLineIn;
     timeLineIn = new TimelineLite({onComplete: function () {
-        this.gameState.gameState = "running";
+        this.gameState.gameState = "rendererReady";
         this.scene.fog = new THREE.Fog(0x000000, 1, 2);
     },
                                    onCompleteScope: this});

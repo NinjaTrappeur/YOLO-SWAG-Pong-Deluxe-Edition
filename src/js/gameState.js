@@ -131,4 +131,6 @@ var GameState = function () {
     //Obstacle popped
     this.popId = null;
     this.cameraPosition = "arena";
+    this.startTime = 0;
+    this.level = 1;
 };

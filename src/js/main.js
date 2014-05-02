@@ -9,8 +9,8 @@ treeGeometry = null;
 
 function animate() {
     "use strict";
-    gameEngine.compute();
     renderer.activeRenderer.render();
+    gameEngine.compute();
     requestAnimationFrame(animate);
 }
 

@@ -47,22 +47,50 @@ GameEngine.prototype.computeKeyboard = function () {
     } else if (this.keyboard.pressed("numpad 0") || this.keyboard.pressed("0")) {
         this.gameState.cameraPosition = "arena";
     } else if (this.keyboard.pressed("numpad 1") || this.keyboard.pressed("1")) {
-        this.gameState.cameraPosition = "bat";   
+        this.gameState.cameraPosition = "bat";
     }
 };
 
 GameEngine.prototype.compute = function () {
     "use strict";
     this.computeKeyboard();
+    if (this.gameState.gameState === "rendererReady") {
+        this.gameState.startTime = new Date().getTime();
+        this.gameState.level = 1;
+        this.gameState.gameState = "running";
+    }
     if (this.gameState.gameState === "running") {
         this.computeObstacles();
         this.computeCollisions();
+        this.computeTime();
     }
 };
 
 GameEngine.prototype.computeCollisions = function () {
     "use strict";
     this.computeBatCollisions();
+};
+
+//Time and level Handling
+//==============================================
+
+GameEngine.prototype.computeTime = function () {
+    "use strict";
+    var currentTime = new Date().getTime();
+    this.gameState.gameTime = currentTime - this.gameState.startTime;
+    if (this.gameState.level === 1 && this.gameState.gameTime > 20000) {
+        this.gameState.level = 2;
+        this.obstaclesVelocity = new THREE.Vector3(0, -0.008, 0);
+        console.log("level 2");
+    } else if (this.gameState.level === 2 && this.gameState.gameTime > 40000) {
+        this.gameState.level = 3;
+        this.obstaclesVelocity = new THREE.Vector3(0, -0.01, 0);
+        console.log("level 3");
+    } else if (this.gameState.level === 3 && this.gameState.gameTime > 60000) {
+        this.gameState.level = 4;
+        this.obstaclesVelocity = new THREE.Vector3(0, -0.014, 0);
+        console.log("level 4");
+    }
 };
 
 
@@ -152,7 +180,7 @@ GameEngine.prototype.moveMesh = function (meshes, velocityVector) {
 //Obstacles Generator
 //-------------------------------------
 
-GameEngine.prototype.generateObstacle = function (maxWidth, maxLength, yPos) {
+GameEngine.prototype.generateObstacle = function (maxWidth, yPos) {
     "use strict";
     var size, width, length, position, mesh, arenaWidth, rand;
     position = new THREE.Vector3();
@@ -176,16 +204,38 @@ GameEngine.prototype.createObstacle = function () {
     if (this.lastObstacleGenerated === null) {
         this.lastObstacleGenerated = -1;
     }
-    
-    result = this.generateObstacle(3 * (arenaSize.width / 4), arenaSize.length / 8,
+    switch (this.gameState.level) {
+    case 1:
+        result = this.generateObstacle(arenaSize.width / 2,
                               (arenaSize.length / 2) +  arenaSize.length / 6);
+        this.nextObstaclePositionY = (arenaSize.length / 2) -
+                    Math.random() * (arenaSize.length / 6);
+        break;
+    case 2:
+        result = this.generateObstacle(2 * (arenaSize.width / 3),
+                              (arenaSize.length / 2) +  arenaSize.length / 6);
+        this.nextObstaclePositionY = (arenaSize.length / 2) -
+                    Math.random() * (arenaSize.length / 7);
+        break;
+    case 3:
+        result = this.generateObstacle(3 * (arenaSize.width / 4),
+                              (arenaSize.length / 2) +  arenaSize.length / 6);
+        this.nextObstaclePositionY = (arenaSize.length / 2) -
+                    Math.random() * (arenaSize.length / 7.5);
+        break;
+    case 4:
+        result = this.generateObstacle(3 * (arenaSize.width / 4),
+                              (arenaSize.length / 2) +  arenaSize.length / 6);
+        this.nextObstaclePositionY = (arenaSize.length / 2) -
+                    Math.random() * (arenaSize.length / 8);
+        break;
+    }
     this.obstacles[this.lastObstacleGenerated + 1] = result[0];
     this.gameState.obstacles[this.lastObstacleGenerated + 1] =
         new Obstacle(result[0].position, result[1]);
     this.gameState.popId = this.lastObstacleGenerated + 1;
     this.lastObstacleGenerated += 1;
-    this.nextObstaclePositionY = (arenaSize.length / 2) -
-        Math.random() * (arenaSize.length / 6);
+
 };
 
 GameEngine.prototype.moveObstacles = function () {
